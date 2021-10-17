@@ -1,12 +1,12 @@
 
 const MAP_LANG_DICT = {
-    'English': 'English',
-    'தமிழ்': 'Tamil'
+    'தமிழ்': 'Tamil',
+    'English': 'English'
 };
 
 const MAP_ISO_DICT = {
-    'English':   'en-IN',
-    'Tamil':     'ta-IN'
+    'Tamil':     'ta-IN',
+    'English':   'en-IN'
 }
 
 const MAP_DOT_DICT = {

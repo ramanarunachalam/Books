@@ -1044,12 +1044,14 @@ function load_content() {
 }
 
 function collection_init(collection, default_book) {
-    var lang = 'English';
+    var lang = 'Tamil';
     window.collection_name = collection;
     window.default_book = default_book;
 
     window.RENDER_LANGUAGE = lang;
     window.GOT_LANGUAGE = lang;
+    set_tamil_regex_list();
+
     window.history_data = undefined;
     window.carnatic_popstate = false;
 
