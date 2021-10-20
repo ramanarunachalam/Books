@@ -242,11 +242,11 @@ let MAP_KEYBOARD_DICT = {"devanagari": {"base": "0x900", "vowel": ["अ", "आ",
 
 const SUPERSCRIPT_CODES = [ 0x00B2, 0x00B3, 0x2074 ];
 
-const CATEGORY_DICT = { 'categories' : [ { 'C' : 'author',   'I' : 'person-fill',       'N' : 'Author'   },
-                                         { 'C' : 'narrator', 'I' : 'person-lines-fill', 'N' : 'Narrator' },
-                                         { 'C' : 'type',     'I' : 'tag',               'N' : 'Type'     },
-                                         { 'C' : 'book',     'I' : 'book',              'N' : 'Book'     },
-                                         { 'C' : 'about',    'I' : 'info-circle',       'N' : 'About'    },
+const CATEGORY_DICT = { 'categories' : [ { 'C' : 'author',   'I' : 'person-fill', 'N' : 'Author'   },
+                                         { 'C' : 'narrator', 'I' : 'reading',     'N' : 'Narrator' },
+                                         { 'C' : 'type',     'I' : 'tag',         'N' : 'Type'     },
+                                         { 'C' : 'book',     'I' : 'solid-book',  'N' : 'Book'     },
+                                         { 'C' : 'about',    'I' : 'info-circle', 'N' : 'About'    },
                                        ]
                       };
 

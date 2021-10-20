@@ -8,11 +8,11 @@ const FF = { 'author'   : [ 'book',   'B', [ 'T', 'N' ], [ 'type',   'narrator' 
              'type'     : [ 'book',   'B', [ 'A', 'N' ], [ 'author', 'narrator' ] ],
              'book'     : [ 'author', 'A', [ 'T', 'N' ], [ 'type',   'narrator' ] ]
            };
-const CARNATIC_ICON_DICT = { 'book'     : 'book',
-                             'author'   : 'person-fill',
-                             'narrator' : 'person-lines-fill',
-                             'type'     : 'tag'
-                           };
+const AUDIO_BOOK_ICON_DICT = { 'book'     : 'solid-book',
+                               'author'   : 'person-fill',
+                               'narrator' : 'reading',
+                               'type'     : 'tag'
+                             };
 
 const SEARCH_MAP_DICT = { 'c' : 's', 'p' : 'b' };
 
@@ -653,7 +653,7 @@ function get_search_results(search_word, search_options, item_list, id_list) {
                 } else {
                     title = get_transliterator_text(lang, title);
                 }
-                var item = { 'T' : category, 'C' : n_category, 'I' : CARNATIC_ICON_DICT[category], 'H' : href, 'N' : title, 'P' : pop };
+                var item = { 'T' : category, 'C' : n_category, 'I' : AUDIO_BOOK_ICON_DICT[category], 'H' : href, 'N' : title, 'P' : pop };
                 item_list.push(item);
                 id_list.add(result_item.id);
             }
