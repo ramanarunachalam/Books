@@ -233,6 +233,8 @@ function info_transliteration(category, data_list) {
             if (lang != 'English' && name in map_dict) {
                 obj['V'] = map_dict[value];
             }
+        } else if (name == 'Wiki') {
+            obj['V'] = `<a href="https://ta.wikipedia.org/wiki/${value}" target="_blank">${value}</a>`;
         } else if (name == 'Born' || name == 'Died') {
             if (value != undefined && typeof value === 'string') {
                 var m_list = [];
