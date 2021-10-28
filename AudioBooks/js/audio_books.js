@@ -368,11 +368,15 @@ function render_nav_template(category, data) {
     var lang = window.RENDER_LANGUAGE;
     var letter_list = data['alphabet']
     var l_list = [];
+    var t_list = [];
     var no_transliterate = lang == 'English' && ENGLISH_TYPE_LIST.includes(category);
     var id_data = window.ID_DATA[category];
     for (var k = 0; k < letter_list.length; k++) {
         var l_item = letter_list[k];
-        l_list.push(l_item['LL']);
+        var letter = l_item['LL'];
+        l_list.push(letter);
+        letter = get_transliterator_text(lang, letter);
+        t_list.push(letter);
         var item_list = l_item['items']
         for (var i = 0; i < item_list.length; i++) {
             var obj = item_list[i];
@@ -393,7 +397,7 @@ function render_nav_template(category, data) {
     var ul_template = $('#nav-ul-template').html();
     var template_html = Mustache.to_html(ul_template, data);
     $('#MENU').html(template_html);
-    $('#slider').sliderNav({ 'items' : l_list });
+    $('#slider').sliderNav({ 'items' : l_list, 'titems' : t_list });
 }
 
 function load_about_data(category, video_data) {
