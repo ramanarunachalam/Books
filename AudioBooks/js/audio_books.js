@@ -237,6 +237,18 @@ function info_transliteration(category, data_list) {
             obj['V'] = get_transliterator_text(lang, value);
         } else if (name == 'Wiki') {
             obj['V'] = `<a href="https://ta.wikipedia.org/wiki/${value}" target="_blank">${value}</a>`;
+        } else if (name == 'Read') {
+            if (value != undefined) {
+                var value_list = value;
+                var read_list = [];
+                for (var j = 0; j < value_list.length; j++) { 
+                    var [h_name, h_value] = value_list[j];
+                    h_name = get_transliterator_text(lang, h_name);
+                    var href = `<a href="${h_value}" target="_blank">${h_name}</a>`;
+                    read_list.push(href);
+                }
+                obj['V'] = read_list.join('<br/>');
+            }
         } else if (name == 'Born' || name == 'Died') {
             if (value != undefined && typeof value === 'string') {
                 var m_list = [];
