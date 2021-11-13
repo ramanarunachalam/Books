@@ -179,7 +179,8 @@ function info_transliteration(category, data_list) {
     var item = data_list['title']
     var h_text = item['H'];
     if (category == 'about') {
-        item['N'] = item['N'];
+        var name = item['N'];
+        item['N'] = (lang == 'English') ? name : map_dict[name];
     } else if (check_for_english_text(lang, category, 200, h_text)) {
         item['N'] = h_text;
     } else {
