@@ -153,27 +153,6 @@ function menu_transliteration(lang) {
     speech_to_text_init();
 }
 
-function get_swara_transliterate(lang, swara_str) {
-    if (lang != 'English') {
-        swara_str = swara_str.replace(/da/g, 'dha');
-    }
-    swara_str = get_transliterator_text(lang, swara_str);
-    swara_str = swara_str.replace(/([123])/g, '<sub>$1</sub>');
-    return swara_str;
-}
-
-function get_swara_text(lang, note_list, value_list) {
-    var swara_str = value_list[0];
-    var s_list = swara_str.split(' ');
-    for (var k = 0; k < s_list.length; k++) {
-        note_list.add(s_list[k]);
-    }
-    swara_str = get_swara_transliterate(lang, swara_str);
-    var note_str = value_list[1];
-    var image_str = `<a href="javascript:play_notes('${note_str}');" ><img class="ICON" src="icons/soundwave.svg" ></a>`;
-    return swara_str + ' ' + image_str;
-}
-
 function check_for_english_text(lang, category, h_id, h_text) {
     if (lang != 'English') {
         return false;
@@ -837,41 +816,6 @@ function handle_context_search() {
         context_list.push(option);
     }
     load_context_search_data(context_list);
-}
-
-function play_ended() {
-    var note_list = window.note_play_list;
-    var note_index = window.note_play_index;
-    var swara = note_list[note_index];
-    var note = NOTE_MAP[swara];
-    var key_div = '#note' + note;
-    var key = $(key_div).css('background-color', window.note_key_color);
-    window.note_play_index += 1;
-    if (window.note_play_index < window.note_play_list.length) {
-        play_note();
-    }
-};
-
-function play_note() {
-    var note_list = window.note_play_list;
-    var note_index = window.note_play_index;
-    var swara = note_list[note_index];
-    var note = NOTE_MAP[swara];
-    var key_div = '#note' + note;
-    window.note_key_color = $(key_div).css('background-color');
-    var key = $(key_div).css('background-color', 'cyan');
-    var note_audio = document.getElementById('NOTE_PLAY');
-    var src = 'audio/' + note + '.mp3';
-    note_audio.src = src;
-    note_audio.currentTime = 0;
-    note_audio.onended = play_ended;
-    note_audio.play();
-}
-
-function play_notes(notes) {
-    window.note_play_list = notes.split(' ');
-    window.note_play_index = 0;
-    play_note();
 }
 
 function get_youtube_video_info(id) {
