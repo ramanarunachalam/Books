@@ -614,7 +614,7 @@ function search_load() {
             var data_list = search_obj[category];
             data_list.forEach(function (data_item, data_index) {
                 var h_id = data_item.H;
-                var aka_list = normalize_search_text(data_item.A).split(',');
+                var aka_list = data_item.A.split(',');
                 var data_doc = { 'id' : data_id, 'href' : h_id, 'title' : h_id, 'aka' : aka_list, 'category' : category, 'pop' : data_item.P };
                 search_engine.add(data_doc);
                 data_id += 1;
