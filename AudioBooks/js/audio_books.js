@@ -149,6 +149,7 @@ function menu_transliteration(lang) {
     var other_dict = { 'P' : playlist, 'S' : search, 'STP' : search_tooltip, 'MTP' : mic_tooltip, 'KTP' : kbd_tooltip };
     var menu_dict = { 'menus' : { 'languages' : lang_list, 'search' : other_dict, 'playlist' : other_dict, 'categories' : CATEGORY_DICT['categories'] } };
     render_card_template('#page-menu-template', '#MENU_DATA', menu_dict);
+    init_search_listener();
 
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
@@ -808,6 +809,11 @@ function load_search_data() {
     var search_word = document.getElementById('SEARCH_WORD').value;
     var search_word = decodeURI(search_word);
     handle_search_word(search_word);
+}
+
+function init_search_listener() {
+    var element = document.getElementById('SEARCH_WORD');
+    element.addEventListener('input', load_search_data);
 }
 
 function load_search_history(data) {
