@@ -255,7 +255,7 @@ function info_transliteration(category, data_list) {
             if (value !== undefined) {
                 const value_list = value;
                 const read_list = [];
-                for (let j = 0; j < value_list.length; j++) { 
+                for (let j = 0; j < value_list.length; j++) {
                     let [h_name, h_value] = value_list[j];
                     h_name = get_transliterator_text(lang, h_name);
                     const href = `<a href="${h_value}" target="_blank">${h_name}</a>`;
