@@ -1,3 +1,5 @@
+const DEFAULT_VIDEO_ID    = "r_j-Ga6NVAw"; 
+const DEFAULT_YOUTUBE_URL = `https://www.youtube.com/embed/${DEFAULT_VIDEO_ID}?enablejsapi=1`;
 
 const VIDEO_INFO_KEY_LIST = new Set([ 'title', 'author_name' ]);
 const ENGLISH_TYPE_LIST = [ 'author', 'narrator', 'type' ];
@@ -8,14 +10,8 @@ const FF = { 'author'   : [ 'book',   'B', [ 'T', 'N' ], [ 'type',   'narrator' 
              'type'     : [ 'book',   'B', [ 'A', 'N' ], [ 'author', 'narrator' ] ],
              'book'     : [ 'author', 'A', [ 'T', 'N' ], [ 'type',   'narrator' ] ]
            };
-const AUDIO_BOOK_ICON_DICT = { 'book'     : 'solid-book',
-                               'author'   : 'person-fill',
-                               'narrator' : 'reading',
-                               'type'     : 'tag'
-                             };
-
+const AUDIO_BOOK_ICON_DICT = {};
 const SEARCH_MAP_DICT = { 'c' : 's', 'p' : 'b' };
-
 
 function sleep(seconds){
     const waitUntil = new Date().getTime() + seconds*1000;
@@ -50,6 +46,16 @@ function plain_get_html_text(id) {
 
 function plain_set_html_text(id, text) {
     document.getElementById(id).innerHTML = text;
+}
+
+function plain_add_class(id, name) {
+    const element = document.getElementById(id);
+    element.classList.add(name);
+}
+
+function plain_remove_class(id, name) {
+    const element = document.getElementById(id);
+    element.classList.remove(name);
 }
 
 function plain_get_attr(id, key) {
@@ -170,7 +176,7 @@ function on_storage_event(storageEvent) {
 }
 
 function load_menu_data(lang) {
-    const item_list = CATEGORY_DICT['categories']
+    const item_list = CATEGORY_DICT['categories'];
     const map_dict = MAP_INFO_DICT[lang];
     for (const obj of item_list) {
         const name = capitalize_word(obj['C']);
@@ -190,7 +196,12 @@ function load_menu_data(lang) {
     const search_tooltip = 'Prefix Search <br/> e.g. pon sel<br/> Phonetic Search <br/> e.g. selvi <br/> Language Search <br/> e.g. கல்யாணி <br/> Context Search <br/> e.g. kalki : selvan : arun';
     const mic_tooltip = 'Only in Chrome';
     const kbd_tooltip = 'Language Keyboard';
-    const menu_dict = { 'menus' : { 'languages' : lang_list, 'APP' : 'Android App', 'P' : playlist, 'S' : search, 'STP' : search_tooltip, 'MTP' : mic_tooltip, 'KTP' : kbd_tooltip, 'categories' : CATEGORY_DICT['categories'] } };
+    const menu_dict = { 'menus' : { 'LANGUAGE' : window.GOT_LANGUAGE, 'languages' : lang_list,
+                                    'S' : search, 'APP' : 'Android App', 'P' : playlist,
+                                    'B' : 'Brightness', 'BI' : 'brightness-low',
+                                    'STP' : search_tooltip, 'MTP' : mic_tooltip, 'KTP' : kbd_tooltip,
+                                    'categories' : CATEGORY_DICT['categories'] }
+                      };
     render_card_template('page-menu-template', 'MENU_DATA', menu_dict);
     init_search_listener();
 
@@ -282,8 +293,7 @@ function info_transliteration(category, data_list) {
     }
 }
 
-function set_language(obj) {
-    const got_lang = obj.value;
+function set_language(got_lang, name_lang) {
     window.GOT_LANGUAGE = got_lang;
     const lang = MAP_LANG_DICT[got_lang];
     window.RENDER_LANGUAGE = lang;
@@ -297,6 +307,19 @@ function set_language(obj) {
     } else  {
         handle_history_context(history_data);
     }
+}
+
+function toggle_icon(id, old_class, new_class) {
+    plain_remove_class(id, old_class);
+    plain_add_class(id, new_class);
+}
+
+function toggle_brightness() {
+    window.COLOR_SCHEME = (window.COLOR_SCHEME === 'dark') ? 'light' : 'dark';
+    const elements = document.getElementsByTagName('html');
+    elements[0].setAttribute('data-bs-theme', window.COLOR_SCHEME);
+    if (window.COLOR_SCHEME === 'dark') toggle_icon('BRIGHTNESS', 'bi-brightness-low', 'bi-brightness-high-fill');
+    else toggle_icon('BRIGHTNESS', 'bi-brightness-high-fill', 'bi-brightness-low');
 }
 
 function load_lang_data(url_data) {
@@ -365,7 +388,7 @@ function show_playlist() {
         title = map_dict[title];
         header_dict = { 'N' : 'No.', 'I' : 'ID', 'BN' : map_dict['Book'], 'AN' : map_dict['Author'] };
     }
-    title = title + `&nbsp; <a href='javascript:create_jukebox();'><img class="ICON" src="icons/card-list.svg" ></a>`;
+    title = title + `&nbsp; <a href='javascript:create_jukebox();'><i class="bi bi-card-list ICON_FONT"></i></a>`;
     const header_list = [ header_dict ];
     const list_data = { 'playlist' : { 'header' : header_list, 'videos' : info_list } };
     render_modal_dialog(title, 'modal-playlist-template', list_data)
@@ -984,7 +1007,7 @@ function speech_to_text_init() {
             }
             if (window.speech_final_transcript || interim_transcript) {
                 window.speech_recognition.stop();
-                plain_set_attr('MIC_IMAGE', 'src', 'icons/mic-mute.svg');
+                toggle_icon('MIC_IMAGE', 'mic', 'mic-mute');
                 document.getElementById('SEARCH_WORD').value = window.speech_final_transcript;
                 // console.log('Speech Final: ' + window.speech_final_transcript);
                 load_search_data();
@@ -1005,7 +1028,7 @@ function speech_start(event) {
     window.speech_recognition.start();
     window.speech_ignore_onend = false;
     window.speech_start_timestamp = event.timeStamp;
-    plain_set_attr('MIC_IMAGE', 'src', 'icons/mic.svg');
+    toggle_icon('MIC_IMAGE', 'mic-mute', 'mic');
 }
 
 function load_keyboard(event) {
@@ -1062,8 +1085,9 @@ function collection_init(collection, default_book) {
     window.collection_name = collection;
     window.default_book = default_book;
 
+    window.COLOR_SCHEME = 'light';
     window.RENDER_LANGUAGE = lang;
-    window.GOT_LANGUAGE = lang;
+    window.GOT_LANGUAGE = MAP_INFO_DICT[lang][lang];
     set_tamil_regex_list();
 
     window.history_data = undefined;
@@ -1072,6 +1096,11 @@ function collection_init(collection, default_book) {
     window.NAV_SCROLL_SPY = null;
     window.ACTIVE_MENU = null;
     window.ACTIVE_NAV = null;
+
+    const item_list = CATEGORY_DICT['categories'];
+    for (const obj of item_list) {
+        AUDIO_BOOK_ICON_DICT[obj.C] = obj.I;
+    }
 
     sessionStorage.clear();
     window.addEventListener('storage', on_storage_event, false);
