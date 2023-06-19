@@ -13,6 +13,7 @@ const FF = { 'author'   : [ 'book',   'B', [ 'T', 'N' ], [ 'type',   'narrator' 
 const AUDIO_BOOK_ICON_DICT = {};
 const SEARCH_MAP_DICT = { 'c' : 's', 'p' : 'b' };
 
+
 function sleep(seconds){
     const waitUntil = new Date().getTime() + seconds*1000;
     while(new Date().getTime() < waitUntil) true;
@@ -198,7 +199,7 @@ function load_menu_data(lang) {
     const kbd_tooltip = 'Language Keyboard';
     const menu_dict = { 'menus' : { 'LANGUAGE' : window.GOT_LANGUAGE, 'languages' : lang_list,
                                     'S' : search, 'APP' : 'Android App', 'P' : playlist,
-                                    'B' : 'Brightness', 'BI' : 'brightness-low',
+                                    'B' : 'Brightness', 'BI' : 'brightness-high-fill',
                                     'STP' : search_tooltip, 'MTP' : mic_tooltip, 'KTP' : kbd_tooltip,
                                     'categories' : CATEGORY_DICT['categories'] }
                       };
@@ -504,9 +505,7 @@ function get_folder_value(category, info, prefix, v) {
 function get_match_count(f_category, f_value, context_list, c_len) {
     let found = 0;
     for (let c = 1; c < c_len; c++) {
-        if (context_list[c][0] == f_category && context_list[c][2] == f_value) {
-            found += 1;
-        }
+        if (context_list[c][0] === f_category && context_list[c][2] === f_value) found += 1;
     }
     return found;
 }
@@ -1085,7 +1084,8 @@ function collection_init(collection, default_book) {
     window.collection_name = collection;
     window.default_book = default_book;
 
-    window.COLOR_SCHEME = 'light';
+    const elements = document.getElementsByTagName('html');
+    window.COLOR_SCHEME = elements[0].getAttribute('data-bs-theme');
     window.RENDER_LANGUAGE = lang;
     window.GOT_LANGUAGE = MAP_INFO_DICT[lang][lang];
     set_tamil_regex_list();
