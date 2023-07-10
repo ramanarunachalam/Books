@@ -23,6 +23,10 @@ function capitalize_word(s) {
     return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
+function get_yt_image(image) {
+    return `https://i.ytimg.com/vi/${image}.jpg`;
+}
+
 async function fetch_url(url) {
     let url_data = null;
     try {
@@ -323,15 +327,6 @@ function toggle_brightness() {
     else toggle_icon('BRIGHTNESS', 'bi-brightness-high-fill', 'bi-brightness-low');
 }
 
-function load_lang_data(url_data) {
-    init_lang_maps(url_data);
-    load_nav_data('author');
-    if (window.default_book !== '') {
-        load_content_data('book', window.default_book);
-    }
-    search_init();
-}
-
 function add_book(audio_file, script_mode) {
     const play_list = get_play_list();
     if (play_list.length <= 0) {
@@ -411,6 +406,8 @@ function render_nav_template(category, data) {
     const letter_list = data['alphabet'];
     const no_transliterate = lang == 'English' && ENGLISH_TYPE_LIST.includes(category);
     const id_data = window.ID_DATA[category];
+    const poster_data = window.ABOUT_DATA[category];
+    const need_poster = category == 'author' || category == 'narrator';
     for (const l_item of letter_list) {
         const letter = l_item['LL'];
         l_item['TL'] = get_transliterator_text(lang, letter);
@@ -428,9 +425,15 @@ function render_nav_template(category, data) {
             } else {
                 obj['N'] = (no_transliterate) ? h_text : get_transliterator_text(lang, f_text);
             }
+            if (need_poster) {
+                const image_name = poster_data[h_id]
+                if (image_name !== undefined) {
+                    obj['P'] = `Images/${image_name}.jpg`;
+                }
+            }
         }
     }
-    const ul_template = plain_get_html_text('nav-ul-template')
+    const ul_template = plain_get_html_text('nav-data-template')
     const template_html = Mustache.render(ul_template, data);
     plain_set_html_text('MENU', template_html);
     if (window.NAV_SCROLL_SP !== null && window.NAV_SCROLL_SP != undefined) {
@@ -529,11 +532,12 @@ function translate_folder_id_to_data(category, id, data) {
                     book[c] = st[m];
                     get_folder_value(st[m], book, OF[m], sd[m]);
                 }
-                if (category == 'book') {
-                    book_ids = book['B'];
-                }
+                if (category == 'book') book_ids = book['B'];
                 book['PS'] = book_ids;
                 book['PR'] = book['A'];
+                book['PR'] = book['R'];
+                const imageId = book['I'].split('&')[0];
+                book['Y'] = (book['J'] === 'h') ? `${imageId}/hqdefault` : `${imageId}/maxresdefault`;
             }
         }
     }
@@ -552,8 +556,11 @@ function render_data_template(category, id, data, context_list) {
     let ul_template = plain_get_html_text(template_name);
     if (lang !== 'English') {
         const map_dict = MAP_INFO_DICT[lang];
-        ul_template = ul_template.replace('Videos', map_dict['Videos']);
-        ul_template = ul_template.replace('Views', map_dict['Views']);
+        data['VideoName'] = map_dict['Videos'];
+        data['ViewName'] = map_dict['Views'];
+    } else {
+        data['VideoName'] = 'Videos';
+        data['ViewName'] = 'Views';
     }
 
     translate_folder_id_to_data(category, id, data);
@@ -633,7 +640,7 @@ function normalize_search_text(search_text) {
 }
 
 function search_load_fetch_data(search_index_obj) {
-    const search_engine = window.carnatic_search_engine;
+    const search_engine = window.audiobook_search_engine;
     let data_id = 0;
     const search_obj = search_index_obj['Search'];
     for (let category in search_obj) {
@@ -651,7 +658,7 @@ function search_load_fetch_data(search_index_obj) {
 }
 
 function search_init() {
-    window.carnatic_search_engine = new MiniSearch({
+    window.audiobook_search_engine = new MiniSearch({
         fields: ['aka'], // fields to index for full-text search
         storeFields: ['title', 'href', 'category', 'pop'] // fields to return with search results
     });
@@ -672,7 +679,7 @@ function get_search_results(search_word, search_options, item_list, id_list, bas
     }
     const lang = window.RENDER_LANGUAGE;
     const map_dict = MAP_INFO_DICT[lang];
-    const search_engine = window.carnatic_search_engine;
+    const search_engine = window.audiobook_search_engine;
     const results = search_engine.search(search_word, search_options);
     if (results.length <= 0) return;
     const max_score = results[0].score;
@@ -899,11 +906,12 @@ function load_content_data(category, name, element, new_context_list) {
     fetch_url_data('CONTENT DATA', url, [ category, name, new_context_list ]);
 }
 
-function load_init_data(id_data, hk_data) {
+function load_init_data(id_data, about_data, hk_data) {
     if (window.innerWidth < 992) {
         show_modal_dialog('Best Viewed in Landscape Mode', 'Use Landscape Mode');
     }
     window.ID_DATA = id_data;
+    window.ABOUT_DATA = about_data;
     init_lang_maps(hk_data);
     load_nav_data('author');
     load_nav_data('about');
@@ -1112,10 +1120,13 @@ function collection_init(collection, default_book) {
         }
     });
 
-    const url_list = [ fetch_url_data('ID DATA', 'id.json'), fetch_url_data('LANG DATA', 'hk_lang_map.json') ];
+    const url_list = [ fetch_url_data('ID DATA', 'id.json'),
+                       fetch_url_data('ABOUT DATA', 'about.json'),
+                       fetch_url_data('LANG DATA', 'hk_lang_map.json')
+                     ];
     Promise.all(url_list).then((values) => {
-        const [ id_data, hk_data ] = values;
-        load_init_data(id_data, hk_data);
+        const [ id_data, about_data, hk_data ] = values;
+        load_init_data(id_data, about_data, hk_data);
     });
 
     init_input_keyboard();
