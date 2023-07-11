@@ -12,6 +12,7 @@ const FF = { 'author'   : [ 'book',   'B', [ 'T', 'N' ], [ 'type',   'narrator' 
            };
 const AUDIO_BOOK_ICON_DICT = {};
 const SEARCH_MAP_DICT = { 'c' : 's', 'p' : 'b' };
+const IMAGE_MAP       = { 'm' : 'maxresdefault', 'h' : 'hqdefault', 's' : 'sddefault' };
 
 
 function sleep(seconds){
@@ -407,7 +408,7 @@ function render_nav_template(category, data) {
     const no_transliterate = lang == 'English' && ENGLISH_TYPE_LIST.includes(category);
     const id_data = window.ID_DATA[category];
     const poster_data = window.ABOUT_DATA[category];
-    const need_poster = category == 'author' || category == 'narrator';
+    const need_poster = category === 'author' || category === 'narrator';
     for (const l_item of letter_list) {
         const letter = l_item['LL'];
         l_item['TL'] = get_transliterator_text(lang, letter);
@@ -428,7 +429,7 @@ function render_nav_template(category, data) {
             if (need_poster) {
                 const image_name = poster_data[h_id]
                 if (image_name !== undefined) {
-                    obj['P'] = `Images/${image_name}.jpg`;
+                    obj['J'] = `Images/${image_name}.jpg`;
                 }
             }
         }
@@ -436,7 +437,7 @@ function render_nav_template(category, data) {
     const ul_template = plain_get_html_text('nav-data-template')
     const template_html = Mustache.render(ul_template, data);
     plain_set_html_text('MENU', template_html);
-    if (window.NAV_SCROLL_SP !== null && window.NAV_SCROLL_SP != undefined) {
+    if (window.NAV_SCROLL_SP !== null && window.NAV_SCROLL_SP !== undefined) {
         window.NAV_SCROLL_SP.refresh();
     } else {
         const scroll_element = document.getElementById('ALPHABET_DATA');
@@ -535,9 +536,8 @@ function translate_folder_id_to_data(category, id, data) {
                 if (category == 'book') book_ids = book['B'];
                 book['PS'] = book_ids;
                 book['PR'] = book['A'];
-                book['PR'] = book['R'];
                 const imageId = book['I'].split('&')[0];
-                book['Y'] = (book['J'] === 'h') ? `${imageId}/hqdefault` : `${imageId}/maxresdefault`;
+                book['Y'] = `${imageId}/${IMAGE_MAP[book['J']]}`;
             }
         }
     }
@@ -701,7 +701,17 @@ function get_search_results(search_word, search_options, item_list, id_list, bas
         } else {
             title = get_transliterator_text(lang, title);
         }
-        const item = { 'T' : category, 'C' : n_category, 'I' : AUDIO_BOOK_ICON_DICT[category], 'H' : href, 'N' : title, 'P' : pop };
+        const item = { 'T' : category, 'C' : n_category, 'I' : AUDIO_BOOK_ICON_DICT[category],
+                       'H' : href, 'N' : title, 'P' : pop
+                     };
+        const need_poster = category === 'author' || category === 'narrator';
+        if (need_poster) {
+            const poster_data = window.ABOUT_DATA[category];
+            const image_name = poster_data[result_item.href]
+            if (image_name !== undefined) {
+                item['J'] = `Images/${image_name}.jpg`;
+            }
+        }
         item_list.push(item);
         id_list.add(result_item.id);
     }
