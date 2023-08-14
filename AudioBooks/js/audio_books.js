@@ -12,8 +12,10 @@ const FF = { 'author'   : [ 'book',   'B', [ 'T', 'N' ], [ 'type',   'narrator' 
            };
 const AUDIO_BOOK_ICON_DICT = {};
 const SEARCH_MAP_DICT = { 'c' : 's', 'p' : 'b' };
-const IMAGE_MAP       = { 'm' : 'maxresdefault', 'h' : 'hqdefault', 's' : 'sddefault' };
-
+const IMAGE_MAP       = { 'm' : 'maxresdefault.jpg', 'h' : 'hqdefault.jpg', 's' : 'sddefault.jpg',
+                          'm2' : 'maxres2.jpg', 'h2' : 'hq2.jpg', 's2' : 'sd2.jpg',
+                          'sw' : 'sddefault.webp', 'sl' : 'sddefault_live.jpg'
+                        };
 
 function sleep(seconds){
     const waitUntil = new Date().getTime() + seconds*1000;
@@ -537,7 +539,8 @@ function translate_folder_id_to_data(category, id, data) {
                 book['PS'] = book_ids;
                 book['PR'] = book['A'];
                 const imageId = book['I'].split('&')[0];
-                book['Y'] = `${imageId}/${IMAGE_MAP[book['J']]}`;
+                const path = IMAGE_MAP[book['J']] ?? 'maxdefault.jpg';
+                book['Y'] = `${imageId}/${path}`;
             }
         }
     }
