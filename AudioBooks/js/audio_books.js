@@ -12,9 +12,14 @@ const FF = { 'author'   : [ 'book',   'B', [ 'T', 'N' ], [ 'type',   'narrator' 
            };
 const AUDIO_BOOK_ICON_DICT = {};
 const SEARCH_MAP_DICT = { 'c' : 's', 'p' : 'b' };
-const IMAGE_MAP       = { 'm' : 'maxresdefault.jpg', 'h' : 'hqdefault.jpg', 's' : 'sddefault.jpg',
-                          'm2' : 'maxres2.jpg', 'h2' : 'hq2.jpg', 's2' : 'sd2.jpg',
-                          'sw' : 'sddefault.webp', 'sl' : 'sddefault_live.jpg'
+const IMAGE_MAP       = { 'm'  : 'maxresdefault.jpg',
+                          'm2' : 'maxres2.jpg',
+                          'h'  : 'hqdefault.jpg',
+                          'h2' : 'hq2.jpg',
+                          's2' : 'sd2.jpg',
+                          's'  : 'sddefault.jpg',
+                          'sw' : 'sddefault.webp',
+                          'sl' : 'sddefault_live.jpg'
                         };
 
 function sleep(seconds){
