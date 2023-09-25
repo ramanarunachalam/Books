@@ -416,33 +416,39 @@ function render_nav_template(category, data) {
     const id_data = window.ID_DATA[category];
     const poster_data = window.ABOUT_DATA[category];
     const need_poster = category === 'author' || category === 'narrator';
-    for (const l_item of letter_list) {
-        const letter = l_item['LL'];
-        l_item['TL'] = get_transliterator_text(lang, letter);
-        const item_list = l_item['items'];
-        for (const obj of item_list) {
-            const h_id = obj['H'];
-            const h_text = id_data[h_id][0];
-            let f_text = id_data[h_id][1];
-            obj['H'] = h_text;
+    const icon = AUDIO_BOOK_ICON_DICT[category];
+    const alphabet_list = [];
+    const lang_data = data['letters'][lang.toLowerCase()];
+    for (let lu in lang_data) {
+        const letter_list = { LL: lu, LU: lu, T: category, I: icon };
+        const id_list = lang_data[lu].split(',');
+        const item_list = [];
+        for (const h_id of id_list) {
+            let [h_text, f_text] = id_data[h_id];
             if (lang !== 'English' && f_text.includes('unknownauthor')) {
                 f_text = f_text.replace('unknownauthor', '?');
             }
+            let n_text = h_text;
             if (check_for_english_text(lang, category, h_id, f_text)) {
-                obj['N'] = h_text;
+                n_text = h_text;
             } else {
-                obj['N'] = (no_transliterate) ? h_text : get_transliterator_text(lang, f_text);
+                n_text = (no_transliterate) ? h_text : get_transliterator_text(lang, f_text);
             }
+            const item = { H: h_text, N: n_text };
             if (need_poster) {
                 const image_name = poster_data[h_id]
                 if (image_name !== undefined) {
-                    obj['J'] = `Images/${image_name}.jpg`;
+                    item['J'] = `Images/${image_name}.jpg`;
                 }
             }
+            item_list.push(item);
         }
+        letter_list['items'] = item_list;
+        alphabet_list.push(letter_list);
     }
+    const new_data = { alphabet: alphabet_list };
     const ul_template = plain_get_html_text('nav-data-template')
-    const template_html = Mustache.render(ul_template, data);
+    const template_html = Mustache.render(ul_template, new_data);
     plain_set_html_text('MENU', template_html);
     if (window.NAV_SCROLL_SP !== null && window.NAV_SCROLL_SP !== undefined) {
         window.NAV_SCROLL_SP.refresh();
@@ -522,33 +528,46 @@ function get_match_count(f_category, f_value, context_list, c_len) {
 }
 
 function translate_folder_id_to_data(category, id, data) {
+    const lang = window.RENDER_LANGUAGE.toLowerCase();
     const ff = FF[category];
     const f_category = ff[0];
     const f_type = ff[1];
     const sd = ff[2];
     const st = ff[3];
-    for (const video of data['videos']) {
-        for (const folder of video['folder']) {
-            const book_list = folder['books'];
-            let book_ids = (category != 'book') ? folder['B'] : '';
-            folder['HT'] = f_category;
-            folder['HC'] = book_list.length;
-            get_folder_value(f_category, folder, 'H', f_type);
-            for (const book of book_list) {
-                for (let m = 0; m < OF.length; m++) {
-                    const c = OF[m] + 'T';
-                    book[c] = st[m];
-                    get_folder_value(st[m], book, OF[m], sd[m]);
-                }
-                if (category == 'book') book_ids = book['B'];
-                book['PS'] = book_ids;
-                book['PR'] = book['A'];
-                const imageId = book['I'].split('&')[0];
-                const path = IMAGE_MAP[book['J']] ?? 'maxdefault.jpg';
-                book['Y'] = `${imageId}/${path}`;
+    const book_list = data['books'];
+    const folder_list = data['folders'];
+    const folder_ids = data['languages'][lang];
+    const fold_id_list = folder_ids.split(',');
+    const new_folder_list = [];
+    for (const f_id of fold_id_list) {
+        const folder = folder_list[+f_id];
+        const [ c_category, c_id, book_ids ] = folder;
+        const book_id_list = book_ids.split(',');
+        const new_folder = { HT: f_category, HC: book_id_list.length };
+        new_folder[f_type] = c_id;
+        get_folder_value(f_category, new_folder, 'H', f_type);
+        const new_book_list = [];
+        let p_book_ids = (category !== 'book') ? folder['S'] : '';
+        for (const book_id of book_id_list) {
+            const book = book_list[+book_id];
+            for (let m = 0; m < OF.length; m++) {
+                const c = OF[m] + 'T';
+                book[c] = st[m];
+                get_folder_value(st[m], book, OF[m], sd[m]);
             }
+            if (category === 'book') p_book_ids = book['S'];
+            book['PS'] = p_book_ids;
+            book['PR'] = book['R'];
+            const imageId = book['I'].split('&')[0];
+            const path = IMAGE_MAP[book['J']] ?? 'maxdefault.jpg';
+            book['Y'] = `${imageId}/${path}`;
+            new_book_list.push(book);
         }
+        new_folder['books'] = new_book_list;
+        new_folder_list.push(new_folder)
     }
+    const new_data = { videos: [{ folder: new_folder_list }] };
+    return new_data;
 }
 
 function render_data_template(category, id, data, context_list) {
@@ -562,16 +581,15 @@ function render_data_template(category, id, data, context_list) {
 
     const template_name = 'page-videos-template'
     let ul_template = plain_get_html_text(template_name);
+    const new_data = translate_folder_id_to_data(category, id, data);
     if (lang !== 'English') {
         const map_dict = MAP_INFO_DICT[lang];
-        data['VideoName'] = map_dict['Videos'];
-        data['ViewName'] = map_dict['Views'];
+        new_data['VideoName'] = map_dict['Videos'];
+        new_data['ViewName'] = map_dict['Views'];
     } else {
-        data['VideoName'] = 'Videos';
-        data['ViewName'] = 'Views';
+        new_data['VideoName'] = 'Videos';
+        new_data['ViewName'] = 'Views';
     }
-
-    translate_folder_id_to_data(category, id, data);
 
     if (context_list !== undefined) {
         const c_len = context_list.length;
@@ -601,7 +619,7 @@ function render_data_template(category, id, data, context_list) {
         }
     }
 
-    const template_html = Mustache.render(ul_template, data);
+    const template_html = Mustache.render(ul_template, new_data);
     plain_set_html_text(id, template_html);
 }
 
