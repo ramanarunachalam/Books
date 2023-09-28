@@ -411,17 +411,17 @@ function handle_playlist_command(cmd, arg) {
 
 function render_nav_template(category, data) {
     const lang = window.RENDER_LANGUAGE;
-    const letter_list = data['alphabet'];
     const no_transliterate = lang == 'English' && ENGLISH_TYPE_LIST.includes(category);
     const id_data = window.ID_DATA[category];
     const poster_data = window.ABOUT_DATA[category];
     const need_poster = category === 'author' || category === 'narrator';
     const icon = AUDIO_BOOK_ICON_DICT[category];
-    const alphabet_list = [];
-    const lang_data = data['letters'][lang.toLowerCase()];
-    for (let lu in lang_data) {
-        const letter_list = { LL: lu, LU: lu, T: category, I: icon };
-        const id_list = lang_data[lu].split(',');
+    const letter_dict = data['letters'][lang.toLowerCase()];
+    // console.log(lang, category, letter_dict);
+    const new_alphabet_list = [];
+    for (let letter in letter_dict) {
+        const new_letter_dict = { LL: letter, LU: letter.toUpperCase(), T: category, I: icon };
+        const id_list = letter_dict[letter].split(',');
         const item_list = [];
         for (const h_id of id_list) {
             let [h_text, f_text] = id_data[h_id];
@@ -443,10 +443,10 @@ function render_nav_template(category, data) {
             }
             item_list.push(item);
         }
-        letter_list['items'] = item_list;
-        alphabet_list.push(letter_list);
+        new_letter_dict['items'] = item_list;
+        new_alphabet_list.push(new_letter_dict);
     }
-    const new_data = { alphabet: alphabet_list };
+    const new_data = { alphabet: new_alphabet_list };
     const ul_template = plain_get_html_text('nav-data-template')
     const template_html = Mustache.render(ul_template, new_data);
     plain_set_html_text('MENU', template_html);
@@ -566,7 +566,7 @@ function translate_folder_id_to_data(category, id, data) {
         new_folder['books'] = new_book_list;
         new_folder_list.push(new_folder)
     }
-    const new_data = { videos: [{ folder: new_folder_list }] };
+    const new_data = { title: data['title'], videos: [{ folder: new_folder_list }] };
     return new_data;
 }
 
@@ -582,6 +582,7 @@ function render_data_template(category, id, data, context_list) {
     const template_name = 'page-videos-template'
     let ul_template = plain_get_html_text(template_name);
     const new_data = translate_folder_id_to_data(category, id, data);
+
     if (lang !== 'English') {
         const map_dict = MAP_INFO_DICT[lang];
         new_data['VideoName'] = map_dict['Videos'];
@@ -593,7 +594,7 @@ function render_data_template(category, id, data, context_list) {
 
     if (context_list !== undefined) {
         const c_len = context_list.length;
-        for (const video of data['videos']) {
+        for (const video of new_data['videos']) {
             const new_folder_list = [];
             for (const folder of video['folder']) {
                 const f_category = folder['HT'];
