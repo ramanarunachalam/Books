@@ -1,5 +1,16 @@
+const LANG_PARAMS = [ 'Tamil', 'தமிழ்' ];
 const DEFAULT_VIDEO_ID    = "r_j-Ga6NVAw"; 
 const DEFAULT_YOUTUBE_URL = `https://www.youtube.com/embed/${DEFAULT_VIDEO_ID}?enablejsapi=1`;
+const HISTORY_TITLE = 'AudioBook';
+
+const SEARCH_TOOLTIP = 'Prefix Search <br/> e.g. pon sel<br/> Phonetic Search <br/> e.g. selvi <br/> Language Search <br/> e.g. கல்யாணி <br/> Context Search <br/> e.g. kalki : selvan : arun';
+const MIC_TOOLTIP = 'Only in Chrome';
+const KBD_TOOLTIP = 'Language Keyboard';
+
+const MAP_LANG_DICT = {
+    'தமிழ்': 'Tamil',
+    'English': 'English'
+};
 
 const VIDEO_INFO_KEY_LIST = new Set([ 'title', 'author_name' ]);
 const ENGLISH_TYPE_LIST = [ 'author', 'narrator', 'type' ];
@@ -10,7 +21,17 @@ const FF = { 'author'   : [ 'book',   'B', [ 'T', 'N' ], [ 'type',   'narrator' 
              'type'     : [ 'book',   'B', [ 'A', 'N' ], [ 'author', 'narrator' ] ],
              'book'     : [ 'author', 'A', [ 'T', 'N' ], [ 'type',   'narrator' ] ]
            };
-const AUDIO_BOOK_ICON_DICT = {};
+
+const CATEGORY_DICT = { 'categories' : [ { 'C' : 'author',   'I' : 'person-fill', 'N' : 'Author'   },
+                                         { 'C' : 'narrator', 'I' : 'incognito',   'N' : 'Narrator' },
+                                         { 'C' : 'type',     'I' : 'tag',         'N' : 'Type'     },
+                                         { 'C' : 'book',     'I' : 'book',        'N' : 'Book'     },
+                                         { 'C' : 'about',    'I' : 'info-circle', 'N' : 'About'    },
+                                       ]
+                      };
+
+const MENU_ICON_DICT = {};
+
 const SEARCH_MAP_DICT = { 'c' : 's', 'p' : 'b' };
 const IMAGE_MAP       = { 'm'  : 'maxresdefault.jpg',
                           'm2' : 'maxres2.jpg',
@@ -21,6 +42,14 @@ const IMAGE_MAP       = { 'm'  : 'maxresdefault.jpg',
                           'sw' : 'sddefault.webp',
                           'sl' : 'sddefault_live.jpg'
                         };
+
+const [ C_PLURAL, C_SINGLE ]   = [ 'books', 'book' ];
+const [ CC_PLURAL, CC_SINGLE ] = [ 'Books', 'Book' ];
+
+PLAYLIST_PENDING_MSG  = [ `${CC_SINGLE} added to Play List`, `Click Play List to Add/Delete ${CC_PLURAL}` ];
+VIEW_IN_LANDSCAPE_MSG = [ 'Best Viewed in Landscape Mode', 'Use Landscape Mode' ];
+VIDEO_NOT_PLAYING_MSG = [ 'Video is not playable', 'Click Play List to Delete Song' ];
+
 
 function sleep(seconds){
     const waitUntil = new Date().getTime() + seconds*1000;
@@ -44,7 +73,7 @@ async function fetch_url(url) {
         }
         url_data = await response.json();
     } catch(error) {
-        console.log('Fetch Error:', error);
+        console.log('Fetch Error:', error, url);
     }
     return url_data;
 }
@@ -135,7 +164,7 @@ function onPlayerStateChange(event) {
     const player_status = event.data;
     // playerStatus: -1 : unstarted, 0 - ended, 1 - playing, 2 - paused, 3 - buffering, 5 - video cued
     if (last_player_status === 3 && player_status === -1) {
-        show_modal_dialog('Video is not playable', 'Click Play List to Delete book');
+        // show_modal_dialog(...VIDEO_NOT_PLAYING_MSG);
     }
     if (player_status === 0) play_next();
     // console.log(`Player Status ${player_status} last: ${last_player_status}`);
@@ -182,37 +211,55 @@ function on_storage_event(storageEvent) {
     const play_list = get_play_list();
     if (play_list.length === 0) return;
     if (play_list.length > 1) {
-        show_modal_dialog('Book added to Play List', 'Click Play List to Add/Delete Books');
+        show_modal_dialog(...PLAYLIST_PENDING_MSG)
         return;
     }
     play_first();
 }
 
-function load_menu_data(lang) {
+function get_lang_text(name, category, h_id) {
+    const category_data = window.LANG_DATA[name][category];
+    return category_data[h_id];
+}
+
+function get_phonetic_text(category, h_id) {
+    return get_lang_text('phonetic', category.toLowerCase(), h_id);
+}
+
+function get_map_text(category, name) {
+    return get_lang_text('map', category, name);
+}
+
+function get_month_text(value) {
+    if (typeof value !== 'string') return '';
+    if (!value.includes(' ')) return '';
+    const m_list = value.split(' ');
+    if (m_list.length != 3) return '';
+    const [ d, m, y ] = m_list;
+    const month = get_map_text('month', m);
+    if (month === undefined) return '';
+    return `${d} ${month} ${y}`;
+}
+
+function load_menu_data(lang, nav_category) {
+    transliterator_lang_init(lang);
+
     const item_list = CATEGORY_DICT['categories'];
-    const map_dict = MAP_INFO_DICT[lang];
     for (const obj of item_list) {
         const name = capitalize_word(obj['C']);
-        obj['N'] = (lang === 'English') ? name : map_dict[name];
+        obj['N'] = get_map_text('info', name);
     }
-    let playlist = 'Playlist';
-    let search = 'Search';
-    if (lang !== 'English') {
-        playlist = map_dict[playlist];
-        search = map_dict[search];
-    }
+    const playlist = get_map_text('info', 'Playlist');
+    const search = get_map_text('info', 'Search');
     const lang_list = [];
     for (let l in MAP_LANG_DICT) {
         let d = (l === window.GOT_LANGUAGE) ? { 'N' : l, 'O' : 'selected' } : { 'N' : l };
         lang_list.push(d);
     }
-    const search_tooltip = 'Prefix Search <br/> e.g. pon sel<br/> Phonetic Search <br/> e.g. selvi <br/> Language Search <br/> e.g. கல்யாணி <br/> Context Search <br/> e.g. kalki : selvan : arun';
-    const mic_tooltip = 'Only in Chrome';
-    const kbd_tooltip = 'Language Keyboard';
     const menu_dict = { 'menus' : { 'LANGUAGE' : window.GOT_LANGUAGE, 'languages' : lang_list,
                                     'S' : search, 'APP' : 'Android App', 'P' : playlist,
                                     'B' : 'Brightness', 'BI' : 'brightness-high-fill',
-                                    'STP' : search_tooltip, 'MTP' : mic_tooltip, 'KTP' : kbd_tooltip,
+                                    'STP' : SEARCH_TOOLTIP, 'MTP' : MIC_TOOLTIP, 'KTP' : KBD_TOOLTIP,
                                     'categories' : CATEGORY_DICT['categories'] }
                       };
     render_card_template('page-menu-template', 'MENU_DATA', menu_dict);
@@ -225,52 +272,33 @@ function load_menu_data(lang) {
       return new bootstrap.Tooltip(tooltipTriggerEl)
     });
     speech_to_text_init();
-}
 
-function check_for_english_text(lang, category, h_id, h_text) {
-    if (lang !== 'English') return false;
-    if (ENGLISH_TYPE_LIST.includes(category)) return true;
-    if (category !== 'book') return false;
-    if (h_id >= 20000) return true;
-    if (h_text.includes(' - ')) return true;
-    return false;
+    load_nav_data(nav_category);
 }
 
 function info_transliteration(category, data_list) {
     const lang = window.RENDER_LANGUAGE;
-    const map_dict = MAP_INFO_DICT[lang];
-
     let item = data_list['title']
     const h_text = item['H'];
     if (category === 'about') {
-        const name = item['N'];
-        item['N'] = (lang === 'English') ? name : map_dict[name];
-    } else if (check_for_english_text(lang, category, 200, h_text)) {
-        item['N'] = h_text;
+        item['N'] = get_map_text('info', item['N']);
     } else {
-        let value = item['V'];
-        if (lang !== 'English' && value.includes('unknowncomposer')) {
-            value = value.replace('unknowncomposer', '?');
-        }
-        item['N'] = get_transliterator_text(lang, value);
+        item['N'] = get_phonetic_text(category, item['T']);
     }
     let item_list = data_list['stats']
     if (item_list === undefined) item_list = [];
     for (const obj of item_list) {
-        let name = obj['H'];
-        obj['N'] = (lang === 'English') ? name : map_dict[name];
+        obj['N'] = get_map_text('info', obj['H']);
     }
     const note_list = new Set();
     item_list = data_list['info']
     if (item_list === undefined) item_list = [];
     for (const obj of item_list) {
         const name = obj['H'];
-        obj['N'] = (lang !== 'English' && name in map_dict) ? map_dict[name] : name;
+        obj['N'] = get_map_text('info', name);
         let value = obj['V'];
         if (name === 'Language') {
-            if (lang !== 'English' && name in map_dict) {
-                obj['V'] = map_dict[value];
-            }
+            obj['V'] = get_map_text('info', value);
         } else if (name === 'Name') {
             obj['V'] = get_transliterator_text(lang, value);
         } else if (name === 'Wiki') {
@@ -288,20 +316,11 @@ function info_transliteration(category, data_list) {
                 obj['V'] = read_list.join('<br/>');
             }
         } else if (name === 'Born' || name === 'Died') {
-            if (value !== undefined && typeof value === 'string') {
-                let m_list = [];
-                if (value.includes(' ')) {
-                    m_list = value.split(' ');
-                }
-                if (m_list.length > 1 && lang in MAP_MONTH_DICT && m_list[1] in MAP_MONTH_DICT[lang]) {
-                    obj['V'] = m_list[0] + ' ' + MAP_MONTH_DICT[lang][m_list[1]] + ' ' + m_list[2];
-                }
-            }
-        } else if (lang !== 'English' && name in map_dict) {
+            const v = get_month_text(value);
+            if (v !== '') obj['V'] = v;
+        } else if (lang !== 'English') {
             value = obj['P'];
-            if (value !== undefined) {
-                obj['V'] = get_transliterator_text(lang, value);
-            }
+            if (value !== undefined) obj['V'] = get_transliterator_text(lang, value);
         }
     }
 }
@@ -312,9 +331,9 @@ function set_language(got_lang, name_lang) {
     window.RENDER_LANGUAGE = lang;
     const history_data = window.history_data;
     // console.log(`SET LANG: ${lang} ${got_lang} ${history_data}`);
-    transliterator_lang_init(lang);
-    load_menu_data(lang);
-    load_nav_data(window.NAV_CATEGORY);
+    const l_lang = lang.toLowerCase();
+    fetch_url_data('LANG DATA', `${l_lang}_map.json`);
+    load_menu_data(lang, window.NAV_CATEGORY);
     if (history_data === undefined) {
         load_content_data(window.CONTENT_CATGEGORY, window.CONTENT_NAME);
     } else  {
@@ -335,7 +354,7 @@ function toggle_brightness() {
     else toggle_icon('BRIGHTNESS', 'bi-brightness-high-fill', 'bi-moon-fill');
 }
 
-function add_book(audio_file, script_mode) {
+function add_video(audio_file, script_mode) {
     const play_list = get_play_list();
     if (play_list.length <= 0) {
         if (audio_file !== '') play_list[0] = audio_file;
@@ -346,17 +365,17 @@ function add_book(audio_file, script_mode) {
     if (play_list.length === 1) {
         play_first();
     } else  if (!script_mode) {
-        show_modal_dialog('Book added to Play List', 'Click Play List to Add/Delete Books');
+        show_modal_dialog(...PLAYLIST_PENDING_MSG)
     }
 }
 
-function delete_book(book_id) {
+function delete_video(video_id) {
     const play_list = get_play_list();
     if (play_list.length > 0) {
-        book_id = parseInt(book_id);
-        play_list.splice(book_id, 1);
+        video_id = parseInt(video_id);
+        play_list.splice(video_id, 1);
         sessionStorage['playlist'] = JSON.stringify(play_list);
-        if (book_id === 0) play_first();
+        if (video_id === 0) play_first();
     }
 }
 
@@ -366,11 +385,11 @@ function delete_row(row) {
     document.getElementById('PLAYLIST_TABLE').deleteRow(row_id);
 }
 
-function create_jukebox() {
-    setTimeout(function() { create_jukebox_modal(); }, 0);
+function create_jukebox(value) {
+    setTimeout(function() { create_jukebox_modal(value); }, 0);
 }
 
-async function create_jukebox_modal() {
+async function create_jukebox_modal(value) {
 }
 
 function show_playlist() {
@@ -384,13 +403,11 @@ function show_playlist() {
         info_list.push(info_dict);
     }
     const lang = window.RENDER_LANGUAGE;
-    const map_dict = MAP_INFO_DICT[lang];
     let header_dict = { 'N' : 'No.', 'I' : 'ID', 'BN' : 'Book', 'AN' : 'Author' };
     let title = 'Playlist';
     if (lang !== 'English') {
-        const map_dict = MAP_INFO_DICT[lang];
-        title = map_dict[title];
-        header_dict = { 'N' : 'No.', 'I' : 'ID', 'BN' : map_dict['Book'], 'AN' : map_dict['Author'] };
+        title = get_map_text('info', title);
+        header_dict = { 'N' : 'No.', 'I' : 'ID', 'BN' : get_map_text('info', 'Book'), 'AN' : get_map_text('info', 'Author') };
     }
     title = title + `&nbsp; <a href='javascript:create_jukebox();'><i class="bi bi-card-list ICON_FONT"></i></a>`;
     const header_list = [ header_dict ];
@@ -400,9 +417,9 @@ function show_playlist() {
 
 function handle_playlist_command(cmd, arg) {
     if (cmd === 'play') {
-        add_book(arg, false);
+        add_video(arg, false);
     } else if (cmd === 'delete') {
-        delete_book(arg);
+        delete_video(arg);
     } else if (cmd === 'show') {
         show_playlist();
     }
@@ -411,11 +428,11 @@ function handle_playlist_command(cmd, arg) {
 
 function render_nav_template(category, data) {
     const lang = window.RENDER_LANGUAGE;
-    const no_transliterate = lang == 'English' && ENGLISH_TYPE_LIST.includes(category);
+    const no_transliterate = lang === 'English' && ENGLISH_TYPE_LIST.includes(category);
     const id_data = window.ID_DATA[category];
     const poster_data = window.ABOUT_DATA[category];
     const need_poster = category === 'author' || category === 'narrator';
-    const icon = AUDIO_BOOK_ICON_DICT[category];
+    const icon = MENU_ICON_DICT[category];
     const letter_dict = data['letters'][lang.toLowerCase()];
     // console.log(lang, category, letter_dict);
     const new_alphabet_list = [];
@@ -425,15 +442,7 @@ function render_nav_template(category, data) {
         const item_list = [];
         for (const h_id of id_list) {
             let [h_text, f_text] = id_data[h_id];
-            if (lang !== 'English' && f_text.includes('unknownauthor')) {
-                f_text = f_text.replace('unknownauthor', '?');
-            }
-            let n_text = h_text;
-            if (check_for_english_text(lang, category, h_id, f_text)) {
-                n_text = h_text;
-            } else {
-                n_text = (no_transliterate) ? h_text : get_transliterator_text(lang, f_text);
-            }
+            const n_text = get_phonetic_text(category, h_id);
             const item = { H: h_text, N: n_text };
             if (need_poster) {
                 const image_name = poster_data[h_id]
@@ -503,20 +512,14 @@ function get_folder_value(category, info, prefix, v) {
     const h_name = prefix + 'D';
     const h_id = info[v];
     if (h_id === undefined) {
-        console.log(`FOLDER: ${category} ${v}, ${info[v]} ${h_name}`);
+        //console.log(`FOLDER: ${category} ${v}, ${info[v]} ${h_name}`);
         return;
     }
-    const h_text = id_data[h_id][0];
-    const f_text = id_data[h_id][1];
-    if (h_text !== 'UnknownType') info[h_name] = h_text;
+    const [ h_text, f_text ] = id_data[h_id];
+    const n_text = get_phonetic_text(category, h_id);
     const f_name = prefix + 'N';
-    if (lang !== 'English' && h_id === 0) {
-        info[f_name] = '?';
-    } else if (check_for_english_text(lang, category, h_id, f_text)) {
-        info[f_name] = h_text;
-    } else {
-        info[f_name] = get_transliterator_text(lang, f_text);
-    }
+    info[h_name] = h_text;
+    info[f_name] = n_text;
 }
 
 function get_match_count(f_category, f_value, context_list, c_len) {
@@ -534,36 +537,36 @@ function translate_folder_id_to_data(category, id, data) {
     const f_type = ff[1];
     const sd = ff[2];
     const st = ff[3];
-    const book_list = data['books'];
+    const video_list = data[C_PLURAL];
     const folder_list = data['folders'];
     const folder_ids = data['languages'][lang];
     const fold_id_list = folder_ids.split(',');
     const new_folder_list = [];
     for (const f_id of fold_id_list) {
         const folder = folder_list[+f_id];
-        const [ c_category, c_id, book_ids ] = folder;
-        const book_id_list = book_ids.split(',');
-        const new_folder = { HT: f_category, HC: book_id_list.length };
-        new_folder[f_type] = c_id;
+        const [ v_category, v_id, video_ids ] = folder;
+        const video_id_list = video_ids.split(',');
+        const new_folder = { HT: f_category, HC: video_id_list.length };
+        new_folder[f_type] = v_id;
         get_folder_value(f_category, new_folder, 'H', f_type);
-        const new_book_list = [];
-        let p_book_ids = (category !== 'book') ? folder['S'] : '';
-        for (const book_id of book_id_list) {
-            const book = book_list[+book_id];
+        const new_video_list = [];
+        let p_video_ids = (category !== C_SINGLE) ? folder['B'] : '';
+        for (const video_id of video_id_list) {
+            const video = video_list[+video_id];
             for (let m = 0; m < OF.length; m++) {
                 const c = OF[m] + 'T';
-                book[c] = st[m];
-                get_folder_value(st[m], book, OF[m], sd[m]);
+                video[c] = st[m];
+                get_folder_value(st[m], video, OF[m], sd[m]);
             }
-            if (category === 'book') p_book_ids = book['S'];
-            book['PS'] = p_book_ids;
-            book['PR'] = book['R'];
-            const imageId = book['I'].split('&')[0];
-            const path = IMAGE_MAP[book['J']] ?? 'maxdefault.jpg';
-            book['Y'] = `${imageId}/${path}`;
-            new_book_list.push(book);
+            if (category === C_SINGLE) p_video_ids = video['B'];
+            video['PS'] = p_video_ids;
+            video['PR'] = video['A'];
+            const imageId = video['I'].split('&')[0];
+            const path = IMAGE_MAP[video['J']] ?? 'maxdefault.jpg';
+            video['Y'] = `${imageId}/${path}`;
+            new_video_list.push(video);
         }
-        new_folder['books'] = new_book_list;
+        new_folder[C_PLURAL] = new_video_list;
         new_folder_list.push(new_folder)
     }
     const new_data = { title: data['title'], videos: [{ folder: new_folder_list }] };
@@ -583,14 +586,8 @@ function render_data_template(category, id, data, context_list) {
     let ul_template = plain_get_html_text(template_name);
     const new_data = translate_folder_id_to_data(category, id, data);
 
-    if (lang !== 'English') {
-        const map_dict = MAP_INFO_DICT[lang];
-        new_data['VideoName'] = map_dict['Videos'];
-        new_data['ViewName'] = map_dict['Views'];
-    } else {
-        new_data['VideoName'] = 'Videos';
-        new_data['ViewName'] = 'Views';
-    }
+    new_data['VideoName'] = get_map_text('info', 'Videos');
+    new_data['ViewName'] = get_map_text('info', 'Views');
 
     if (context_list !== undefined) {
         const c_len = context_list.length;
@@ -600,21 +597,21 @@ function render_data_template(category, id, data, context_list) {
                 const f_category = folder['HT'];
                 const f_value = folder['HN'];
                 const s_found = get_match_count(f_category, f_value, context_list, c_len);
-                const book_list = folder['books'];
-                const new_book_list = [];
-                for (const book of book_list) {
+                const video_list = folder[C_PLURAL];
+                const new_video_list = [];
+                for (const video of video_list) {
                     let found = s_found;
                     for (let m = 0; m < OF.length; m++) {
                         let c = OF[m] + 'T';
-                        let f_category = book[c];
+                        let f_category = video[c];
                         c = OF[m] + 'N';
-                        let f_value = book[c];
+                        let f_value = video[c];
                         found += get_match_count(f_category, f_value, context_list, c_len);
                     }
-                    if (found >= (c_len - 1)) new_book_list.push(book);
+                    if (found >= (c_len - 1)) new_video_list.push(video);
                 }
-                folder['books'] = new_book_list;
-                if (new_book_list.length > 0) new_folder_list.push(folder);
+                folder[C_PLURAL] = new_video_list;
+                if (new_video_list.length > 0) new_folder_list.push(folder);
             }
             video['folder'] = new_folder_list;
         }
@@ -626,9 +623,8 @@ function render_data_template(category, id, data, context_list) {
 
 function empty_content_data(category, name) {
     const lang = window.RENDER_LANGUAGE;
-    const map_dict = MAP_INFO_DICT[lang];
     plain_set_html_text('PAGE_TITLE', '');
-    render_card_template('page-info-spinner', 'PAGE_INFO', { 'info' : { 'T' : map_dict['Fetch'] } });
+    render_card_template('page-info-spinner', 'PAGE_INFO', { 'info' : { 'T' : get_map_text('info', 'Fetch') } });
     const empty_data = {};
     render_data_template('', '', empty_data);
     window.scrollTo(0, 0);
@@ -667,7 +663,7 @@ function normalize_search_text(search_text) {
 }
 
 function search_load_fetch_data(search_index_obj) {
-    const search_engine = window.audiobook_search_engine;
+    const search_engine = window.indic_search_engine;
     let data_id = 0;
     const search_obj = search_index_obj['Search'];
     for (let category in search_obj) {
@@ -680,12 +676,12 @@ function search_load_fetch_data(search_index_obj) {
             data_id += 1;
         });
     }
-    window.CARNATIC_CHAR_MAP = search_index_obj['Charmap'];
-    transliterator_init();
+
+    transliterate_search_init();
 }
 
 function search_init() {
-    window.audiobook_search_engine = new MiniSearch({
+    window.indic_search_engine = new MiniSearch({
         fields: ['aka'], // fields to index for full-text search
         storeFields: ['title', 'href', 'category', 'pop'] // fields to return with search results
     });
@@ -705,9 +701,7 @@ function get_search_results(search_word, search_options, item_list, id_list, bas
         search_word = new_word_list.join(' ');
     }
     const lang = window.RENDER_LANGUAGE;
-    const map_dict = MAP_INFO_DICT[lang];
-    const search_engine = window.audiobook_search_engine;
-    const results = search_engine.search(search_word, search_options);
+    const results = window.indic_search_engine.search(search_word, search_options);
     if (results.length <= 0) return;
     const max_score = results[0].score;
     for (const result_item of results) {
@@ -720,15 +714,10 @@ function get_search_results(search_word, search_options, item_list, id_list, bas
         const category = result_item.category
         const id_data = window.ID_DATA[category];
         const c_name = capitalize_word(category);
-        const n_category = (lang === 'English') ? category.toUpperCase() : map_dict[c_name];
+        const n_category = (lang === 'English') ? category.toUpperCase() : get_map_text('info', c_name);
         const href = id_data[result_item.href][0];
-        let title = id_data[result_item.title][1];
-        if (check_for_english_text(lang, category, result_item.href, href)) {
-            title = href;
-        } else {
-            title = get_transliterator_text(lang, title);
-        }
-        const item = { 'T' : category, 'C' : n_category, 'I' : AUDIO_BOOK_ICON_DICT[category],
+        const title = get_phonetic_text(category, result_item.href);
+        const item = { 'T' : category, 'C' : n_category, 'I' : MENU_ICON_DICT[category],
                        'H' : href, 'N' : title, 'P' : pop
                      };
         const need_poster = category === 'author' || category === 'narrator';
@@ -742,56 +731,6 @@ function get_search_results(search_word, search_options, item_list, id_list, bas
         item_list.push(item);
         id_list.add(result_item.id);
     }
-}
-
-function transliterator_init() {
-    const char_map = window.CARNATIC_CHAR_MAP;
-    const key_list = [];
-    let max_len = 0;
-    for (let s in char_map) {
-        key_list.push(s);
-        max_len = Math.max(max_len, s.length);
-    }
-    window.CHAR_MAP_MAX_LENGTH = max_len;
-    window.CHAR_MAP_KEY_LIST = new Set(key_list);
-
-    set_tamil_regex_list();
-}
-
-function transliterate_text(word) {
-    const char_map = window.CARNATIC_CHAR_MAP;
-    const tokenset = window.CHAR_MAP_KEY_LIST;
-    const maxlen = window.CHAR_MAP_MAX_LENGTH;
-    let current = 0;
-    const tokenlist = [];
-    word = word.toString();
-    while (current < word.length) {
-        const nextstr = word.slice(current, current+maxlen);
-        let p = nextstr[0];
-        let j = 1;
-        let i = maxlen;
-        while (i > 0) {
-            let s = nextstr.slice(0, i);
-            if (tokenset.has(s)) {
-                p = s;
-                j = i;
-                break
-            }
-            i -= 1;
-        }
-        if (p in char_map) {
-            p = char_map[p];
-        }
-        tokenlist.push(p);
-        current += j;
-    }
-    let new_word = tokenlist.join('');
-    if (word !== new_word) {
-        new_word = new_word.replace(/_/g, '');
-        new_word = new_word.replace(/G/g, 'n');
-        new_word = new_word.replace(/J/g, 'n');
-    }
-    return new_word;
 }
 
 function get_tamil_phonetic_word(word) {
@@ -835,7 +774,7 @@ function load_search_part(search_word, non_english) {
 function handle_search_word(search_word) {
     const lang = window.RENDER_LANGUAGE;
     const c = search_word.charCodeAt(0);
-    if (c > 127) search_word = transliterate_text(search_word);
+    if (c > 127) search_word = transliterate_search_text(search_word);
     const non_english = (0x0B80 <= c && c <= 0x0BFF) ? true : false;
     const context_list = search_word.split(':');
     const context_dict = {};
@@ -844,12 +783,8 @@ function handle_search_word(search_word) {
         new_item_list = load_search_part(word, non_english);
         context_dict[word] = new_item_list;
     }
-    let result_header = 'Search Results';
-    if (lang !== 'English') {
-        const map_dict = MAP_INFO_DICT[lang];
-        result_header = map_dict[result_header];
-    }
-    const item_data = { 'title' : { 'N': result_header, 'I': 'search' }, 'items' : new_item_list };
+    const result_title = get_map_text('info', 'Search Results');
+    const item_data = { 'title' : { 'N': result_title, 'I': 'search' }, 'items' : new_item_list };
     render_card_template('page-title-template', 'PAGE_TITLE', item_data);
     if (context_list.length <= 1) {
         render_card_template('page-search-template', 'PAGE_INFO', item_data);
@@ -943,15 +878,18 @@ function load_content_data(category, name, element, new_context_list) {
     fetch_url_data('CONTENT DATA', url, [ category, name, new_context_list ]);
 }
 
-function load_init_data(id_data, about_data, hk_data) {
+function load_init_data(data_set_list) {
+    const lang = window.RENDER_LANGUAGE;
+    const [ id_data, about_data, lang_data ] = data_set_list;
     if (window.innerWidth < 992) {
-        show_modal_dialog('Best Viewed in Landscape Mode', 'Use Landscape Mode');
+        show_modal_dialog(...VIEW_IN_LANDSCAPE_MSG)
     }
     window.ID_DATA = id_data;
     window.ABOUT_DATA = about_data;
-    init_lang_maps(hk_data);
-    load_nav_data('author');
-    load_nav_data('about');
+    window.LANG_DATA = lang_data;
+    window.LANG_MAPS = new Map();
+    load_menu_data(lang, 'author');
+    if (window.default_video !== '') load_content_data(C_SINGLE, window.default_video);
     search_init();
 }
 
@@ -961,6 +899,8 @@ async function fetch_url_data(name, url, args) {
     if (name === 'NAV DATA') {
         const category = args[0];
         load_nav_fetch_data(category, url_data);
+    } else if (name === 'LANG DATA') {
+        window.LANG_DATA = url_data;
     } else if (name === 'CONTENT DATA') {
         const [ category, h_name, new_context_list ] = args;
         render_content_data(category, h_name, url_data, new_context_list);
@@ -1067,8 +1007,9 @@ function speech_start(event) {
         return;
     }
     const lang = window.RENDER_LANGUAGE;
+    const iso_lang = window.LANG_DATA['map']['iso'][lang];
     window.speech_final_transcript = '';
-    window.speech_recognition.lang = MAP_ISO_DICT[lang];
+    window.speech_recognition.lang = iso_lang;
     window.speech_recognition.start();
     window.speech_ignore_onend = false;
     window.speech_start_timestamp = event.timeStamp;
@@ -1076,8 +1017,7 @@ function speech_start(event) {
 }
 
 function load_keyboard(event) {
-    const lang = window.RENDER_LANGUAGE;
-    set_input_keyboard(lang.toLowerCase());
+    set_input_keyboard(window.LANG_DATA['map']['keyboard']);
     get_bs_modal('LANG_KBD').show();
 }
 
@@ -1096,7 +1036,7 @@ function handle_popstate(e) {
     const data = e.state;
     if (data === null || data === undefined) return;
     // console.log('POP: ', e);
-    window.carnatic_popstate = true;
+    window.indic_popstate = true;
     handle_history_context(data);
     const lang = data['language'];
     // set_language({ 'value' : lang });
@@ -1104,18 +1044,18 @@ function handle_popstate(e) {
 
 function add_history(context, data) {
     const url = window.collection_name + '.html';
-    // if (context === 'nav') return;
     data['language'] = window.GOT_LANGUAGE;
-    if (!window.carnatic_popstate) {
+    if (!window.indic_popstate) {
         data['context'] = context;
-        let title = 'Carnatic: ' + capitalize_word(data['category']);
+        const c_name = capitalize_word(data['category']);
+        let title = `${HISTORY_TITLE}: ${c_name}`;
         const name = data['name'];
         if (name !== undefined) title += ' ' + name;
-        // console.log('PUSH: ', data, window.carnatic_popstate);
+        // console.log('PUSH: ', data, window.indic_popstate);
         history.pushState(data, title, url);
     }
     window.history_data = data;
-    window.carnatic_popstate = false;
+    window.indic_popstate = false;
 }
 
 function load_youtube_frame() {
@@ -1124,19 +1064,17 @@ function load_youtube_frame() {
     youtube_player_init();
 }
 
-function collection_init(collection, default_book) {
-    const lang = 'Tamil';
+function collection_init(collection, default_video) {
+    const [ lang, got_lang ] = LANG_PARAMS;
     window.collection_name = collection;
-    window.default_book = default_book;
+    window.default_video = default_video;
 
     const elements = document.getElementsByTagName('html');
     window.COLOR_SCHEME = elements[0].getAttribute('data-bs-theme');
     window.RENDER_LANGUAGE = lang;
-    window.GOT_LANGUAGE = MAP_INFO_DICT[lang][lang];
-    set_tamil_regex_list();
-
+    window.GOT_LANGUAGE = got_lang;
     window.history_data = undefined;
-    window.carnatic_popstate = false;
+    window.indic_popstate = false;
 
     window.NAV_SCROLL_SPY = null;
     window.ACTIVE_MENU = null;
@@ -1144,7 +1082,7 @@ function collection_init(collection, default_book) {
 
     const item_list = CATEGORY_DICT['categories'];
     for (const obj of item_list) {
-        AUDIO_BOOK_ICON_DICT[obj.C] = obj.I;
+        MENU_ICON_DICT[obj.C] = obj.I;
     }
 
     sessionStorage.clear();
@@ -1157,16 +1095,11 @@ function collection_init(collection, default_book) {
         }
     });
 
+    const l_lang = lang.toLowerCase();
     const url_list = [ fetch_url_data('ID DATA', 'id.json'),
                        fetch_url_data('ABOUT DATA', 'about.json'),
-                       fetch_url_data('LANG DATA', 'hk_lang_map.json')
+                       fetch_url_data('LANG DATA', `${l_lang}_map.json`)
                      ];
-    Promise.all(url_list).then((values) => {
-        const [ id_data, about_data, hk_data ] = values;
-        load_init_data(id_data, about_data, hk_data);
-    });
-
-    init_input_keyboard();
-    load_menu_data(lang);
+    Promise.all(url_list).then((data_set_list) => { load_init_data(data_set_list); });
 }
 
