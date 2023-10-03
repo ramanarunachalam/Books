@@ -325,14 +325,14 @@ function info_transliteration(category, data_list) {
     }
 }
 
-function set_language(got_lang, name_lang) {
+async function set_language(got_lang, name_lang) {
     window.GOT_LANGUAGE = got_lang;
     const lang = MAP_LANG_DICT[got_lang];
     window.RENDER_LANGUAGE = lang;
     const history_data = window.history_data;
     // console.log(`SET LANG: ${lang} ${got_lang} ${history_data}`);
     const l_lang = lang.toLowerCase();
-    fetch_url_data('LANG DATA', `${l_lang}_map.json`);
+    await fetch_url_data('LANG DATA', `${l_lang}_map.json`);
     load_menu_data(lang, window.NAV_CATEGORY);
     if (history_data === undefined) {
         load_content_data(window.CONTENT_CATGEGORY, window.CONTENT_NAME);

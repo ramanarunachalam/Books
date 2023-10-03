@@ -155,7 +155,7 @@ function transliterate_search_text(word) {
         new_word = new_word.replace(/G/g, 'n');
         new_word = new_word.replace(/J/g, 'n');
     }
-    console.log('transliterate_search_text:', new_word);
+    // console.log('transliterate_search_text:', new_word);
     return new_word;
 }
 
