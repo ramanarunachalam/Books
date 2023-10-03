@@ -3942,17 +3942,7 @@
         },
         "language": {
             "English": "English",
-            "தமிழ்": "Tamil",
-            "తెలుగు": "Telugu",
-            "ಕನ್ನಡ": "Kannada",
-            "മലയാളം": "Malayalam",
-            "हिंदी": "Hindi",
-            "मराठी": "Marathi",
-            "বাংলা": "Bengali",
-            "ગુજરાતી": "Gujarati",
-            "ਪੰਜਾਬੀ": "Punjabi",
-            "ଓଡ଼ିଆ": "Odia",
-            "অসমীয়া": "Assamese"
+            "தமிழ்": "Tamil"
         },
         "keyboard": {
             "base": "0",
@@ -4055,6 +4045,9 @@
             "3,3,3,6,2,1,2,2,2,2"
         ],
         "from_length": 6,
-        "to_hk": []
+        "to_hk": [
+            "a",
+            "a"
+        ]
     }
 }

@@ -7,11 +7,6 @@ const SEARCH_TOOLTIP = 'Prefix Search <br/> e.g. pon sel<br/> Phonetic Search <b
 const MIC_TOOLTIP = 'Only in Chrome';
 const KBD_TOOLTIP = 'Language Keyboard';
 
-const MAP_LANG_DICT = {
-    'தமிழ்': 'Tamil',
-    'English': 'English'
-};
-
 const VIDEO_INFO_KEY_LIST = new Set([ 'title', 'author_name' ]);
 const ENGLISH_TYPE_LIST = [ 'author', 'narrator', 'type' ];
 const CC = [ 'I', 'A', 'D', 'V' ];
@@ -30,6 +25,12 @@ const CATEGORY_DICT = { 'categories' : [ { 'C' : 'author',   'I' : 'person-fill'
                                        ]
                       };
 
+const START_NAV_CATEGORY = 'author';
+const [ C_PLURAL, C_SINGLE ]   = [ 'books', 'book' ];
+const [ CC_PLURAL, CC_SINGLE ] = [ 'Books', 'Book' ];
+
+const LINK_ACTIVE_BUTTON = 2;
+
 const MENU_ICON_DICT = {};
 
 const SEARCH_MAP_DICT = { 'c' : 's', 'p' : 'b' };
@@ -42,9 +43,6 @@ const IMAGE_MAP       = { 'm'  : 'maxresdefault.jpg',
                           'sw' : 'sddefault.webp',
                           'sl' : 'sddefault_live.jpg'
                         };
-
-const [ C_PLURAL, C_SINGLE ]   = [ 'books', 'book' ];
-const [ CC_PLURAL, CC_SINGLE ] = [ 'Books', 'Book' ];
 
 PLAYLIST_PENDING_MSG  = [ `${CC_SINGLE} added to Play List`, `Click Play List to Add/Delete ${CC_PLURAL}` ];
 VIEW_IN_LANDSCAPE_MSG = [ 'Best Viewed in Landscape Mode', 'Use Landscape Mode' ];
@@ -251,8 +249,9 @@ function load_menu_data(lang, nav_category) {
     }
     const playlist = get_map_text('info', 'Playlist');
     const search = get_map_text('info', 'Search');
+    const lang_map_dict = window.LANG_DATA['map']['language'];
     const lang_list = [];
-    for (let l in MAP_LANG_DICT) {
+    for (let l in lang_map_dict) {
         let d = (l === window.GOT_LANGUAGE) ? { 'N' : l, 'O' : 'selected' } : { 'N' : l };
         lang_list.push(d);
     }
@@ -327,7 +326,8 @@ function info_transliteration(category, data_list) {
 
 async function set_language(got_lang, name_lang) {
     window.GOT_LANGUAGE = got_lang;
-    const lang = MAP_LANG_DICT[got_lang];
+    const lang_map_dict = window.LANG_DATA['map']['language'];
+    const lang = lang_map_dict[got_lang];
     window.RENDER_LANGUAGE = lang;
     const history_data = window.history_data;
     // console.log(`SET LANG: ${lang} ${got_lang} ${history_data}`);
@@ -426,12 +426,16 @@ function handle_playlist_command(cmd, arg) {
     return true;
 }
 
+function check_need_poster(category) {
+     return category === 'author' || category === 'narrator';
+}
+
 function render_nav_template(category, data) {
     const lang = window.RENDER_LANGUAGE;
     const no_transliterate = lang === 'English' && ENGLISH_TYPE_LIST.includes(category);
     const id_data = window.ID_DATA[category];
     const poster_data = window.ABOUT_DATA[category];
-    const need_poster = category === 'author' || category === 'narrator';
+    const need_poster = check_need_poster(category);
     const icon = MENU_ICON_DICT[category];
     const letter_dict = data['letters'][lang.toLowerCase()];
     // console.log(lang, category, letter_dict);
@@ -489,7 +493,7 @@ function load_nav_fetch_data(category, url_data) {
 
 function set_link_initial_active_state() {
     const a_list = plain_get_query_selector('#MENU_DATA li a');
-    const a_node = a_list[2].parentNode;
+    const a_node = a_list[LINK_ACTIVE_BUTTON].parentNode;
     window.ACTIVE_MENU = a_node;
     a_node.classList.add('active');
 }
@@ -720,7 +724,7 @@ function get_search_results(search_word, search_options, item_list, id_list, bas
         const item = { 'T' : category, 'C' : n_category, 'I' : MENU_ICON_DICT[category],
                        'H' : href, 'N' : title, 'P' : pop
                      };
-        const need_poster = category === 'author' || category === 'narrator';
+        const need_poster = check_need_poster(category);
         if (need_poster) {
             const poster_data = window.ABOUT_DATA[category];
             const image_name = poster_data[result_item.href]
@@ -888,7 +892,7 @@ function load_init_data(data_set_list) {
     window.ABOUT_DATA = about_data;
     window.LANG_DATA = lang_data;
     window.LANG_MAPS = new Map();
-    load_menu_data(lang, 'author');
+    load_menu_data(lang, START_NAV_CATEGORY);
     if (window.default_video !== '') load_content_data(C_SINGLE, window.default_video);
     search_init();
 }

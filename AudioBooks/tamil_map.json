@@ -3942,17 +3942,7 @@
         },
         "language": {
             "English": "English",
-            "தமிழ்": "Tamil",
-            "తెలుగు": "Telugu",
-            "ಕನ್ನಡ": "Kannada",
-            "മലയാളം": "Malayalam",
-            "हिंदी": "Hindi",
-            "मराठी": "Marathi",
-            "বাংলা": "Bengali",
-            "ગુજરાતી": "Gujarati",
-            "ਪੰਜਾਬੀ": "Punjabi",
-            "ଓଡ଼ିଆ": "Odia",
-            "অসমীয়া": "Assamese"
+            "தமிழ்": "Tamil"
         },
         "keyboard": {
             "base": "0xb80",
