@@ -968,7 +968,7 @@
             "736": "vaigai perugi varumO",
             "737": "vaira malar",
             "738": "valai osai",
-            "739": "vallamai thanthu vidu",
+            "739": "vallamai thanthu viDu",
             "740": "vaNNa vizhi pArvaiyilE",
             "741": "vanthu pOgum mEgam",
             "742": "vArisu",
@@ -2729,7 +2729,7 @@
             "2497": "piRanda iDam nOkki",
             "2498": "iraNDu naNparkaLin kadai",
             "2499": "maNakkula maDandai",
-            "2500": "Oru Uril iraNDu manidargaL",
+            "2500": "oru Uril iraNDu manidargaL",
             "2501": "Ovar Taim",
             "2502": "iRanda kAlangaL",
             "2503": "naTpu",
@@ -3379,7 +3379,7 @@
             "3147": "vinayA oru viDugadai",
             "3148": "adiyamAn neDumAn",
             "3149": "mazhai",
-            "3150": "orE Oru dhurOgam",
+            "3150": "orE oru dhurOgam",
             "3151": "rikshAgAran pAshai",
             "3152": "thanimai",
             "3153": "thanivazhippAdhai",
@@ -3671,7 +3671,7 @@
             "3439": "padhavi uyarvu",
             "3440": "puttANDuc cULurai",
             "3441": "vanduTTAru",
-            "3442": "viduthalai vETkkai",
+            "3442": "viDuthalai vETkkai",
             "3443": "gyAnOdhayam",
             "3444": "ilavu kAtta palavEsam",
             "3445": "mUnRu kaDidhangaL",
@@ -4037,8 +4037,8 @@
             "middle": []
         },
         "from_hk": [
-            " jJ \tjJ \njJ jJ Jc Jj Mc Mj Mk Mg MT MD Mt Md Ms G _r _n .R .R.R .l.R .l.R.R M A~",
-            " jn \tjn \njn gy nc nj nc nj nk ng NT ND nt nd ns n R n ru rU lu lU m An"
+            " jJ,\tjJ,\njJ,jJ,Jc,Jj,Mc,Mj,Mk,Mg,MT,MD,Mt,Md,Ms,G,_r,_n,.R,.R.R,.l.R,.l.R.R,M,A~",
+            " jn,\tjn,\njn,gy,nc,nj,nc,nj,nk,ng,NT,ND,nt,nd,ns,n,R,n,ru,rU,lu,lU,m,An"
         ],
         "from_freq": [
             "\t,\n, ,.,A,G,J,M,_,j",
@@ -4048,6 +4048,11 @@
         "to_hk": [
             "a",
             "a"
-        ]
+        ],
+        "to_freq": [
+            "a",
+            "1"
+        ],
+        "to_length": 0
     }
 }

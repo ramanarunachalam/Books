@@ -8,7 +8,6 @@ const MIC_TOOLTIP = 'Only in Chrome';
 const KBD_TOOLTIP = 'Language Keyboard';
 
 const VIDEO_INFO_KEY_LIST = new Set([ 'title', 'author_name' ]);
-const ENGLISH_TYPE_LIST = [ 'author', 'narrator', 'type' ];
 const CC = [ 'I', 'A', 'D', 'V' ];
 const OF = [ 'F', 'S', 'T' ];
 const FF = { 'author'   : [ 'book',   'B', [ 'T', 'N' ], [ 'type',   'narrator' ] ],
@@ -299,7 +298,7 @@ function info_transliteration(category, data_list) {
         if (name === 'Language') {
             obj['V'] = get_map_text('info', value);
         } else if (name === 'Name') {
-            obj['V'] = get_transliterator_text(lang, value);
+            obj['V'] = transliterate_hk_to_lang(lang, value);
         } else if (name === 'Wiki') {
             obj['V'] = `<a href="https://ta.wikipedia.org/wiki/${value}" target="_blank">${value}</a>`;
         } else if (name === 'Read') {
@@ -308,7 +307,7 @@ function info_transliteration(category, data_list) {
                 const read_list = [];
                 for (let j = 0; j < value_list.length; j++) {
                     let [h_name, h_value] = value_list[j];
-                    h_name = get_transliterator_text(lang, h_name);
+                    h_name = transliterate_hk_to_lang(lang, h_name);
                     const href = `<a href="${h_value}" target="_blank">${h_name}</a>`;
                     read_list.push(href);
                 }
@@ -319,7 +318,7 @@ function info_transliteration(category, data_list) {
             if (v !== '') obj['V'] = v;
         } else if (lang !== 'English') {
             value = obj['P'];
-            if (value !== undefined) obj['V'] = get_transliterator_text(lang, value);
+            if (value !== undefined) obj['V'] = transliterate_hk_to_lang(lang, value);
         }
     }
 }
@@ -432,7 +431,6 @@ function check_need_poster(category) {
 
 function render_nav_template(category, data) {
     const lang = window.RENDER_LANGUAGE;
-    const no_transliterate = lang === 'English' && ENGLISH_TYPE_LIST.includes(category);
     const id_data = window.ID_DATA[category];
     const poster_data = window.ABOUT_DATA[category];
     const need_poster = check_need_poster(category);
@@ -680,8 +678,6 @@ function search_load_fetch_data(search_index_obj) {
             data_id += 1;
         });
     }
-
-    transliterate_search_init();
 }
 
 function search_init() {
@@ -778,7 +774,7 @@ function load_search_part(search_word, non_english) {
 function handle_search_word(search_word) {
     const lang = window.RENDER_LANGUAGE;
     const c = search_word.charCodeAt(0);
-    if (c > 127) search_word = transliterate_search_text(search_word);
+    if (c > 127) search_word = transliterate_lang_to_hk(search_word);
     const non_english = (0x0B80 <= c && c <= 0x0BFF) ? true : false;
     const context_list = search_word.split(':');
     const context_dict = {};
@@ -891,7 +887,6 @@ function load_init_data(data_set_list) {
     window.ID_DATA = id_data;
     window.ABOUT_DATA = about_data;
     window.LANG_DATA = lang_data;
-    window.LANG_MAPS = new Map();
     load_menu_data(lang, START_NAV_CATEGORY);
     if (window.default_video !== '') load_content_data(C_SINGLE, window.default_video);
     search_init();
@@ -1098,6 +1093,8 @@ function collection_init(collection, default_video) {
             setTimeout(load_youtube_frame, 0);
         }
     });
+
+    transliterator_init();
 
     const l_lang = lang.toLowerCase();
     const url_list = [ fetch_url_data('ID DATA', 'id.json'),
