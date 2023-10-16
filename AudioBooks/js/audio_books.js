@@ -298,7 +298,7 @@ function info_transliteration(category, data_list) {
         if (name === 'Language') {
             obj['V'] = get_map_text('info', value);
         } else if (name === 'Name') {
-            obj['V'] = transliterate_hk_to_lang(lang, value);
+            obj['V'] = get_phonetic_text('real name', obj['I']);
         } else if (name === 'Wiki') {
             obj['V'] = `<a href="https://ta.wikipedia.org/wiki/${value}" target="_blank">${value}</a>`;
         } else if (name === 'Read') {
@@ -307,7 +307,7 @@ function info_transliteration(category, data_list) {
                 const read_list = [];
                 for (let j = 0; j < value_list.length; j++) {
                     let [h_name, h_value] = value_list[j];
-                    h_name = transliterate_hk_to_lang(lang, h_name);
+                    const t_name = get_map_text('website', h_name);
                     const href = `<a href="${h_value}" target="_blank">${h_name}</a>`;
                     read_list.push(href);
                 }
@@ -317,8 +317,8 @@ function info_transliteration(category, data_list) {
             const v = get_month_text(value);
             if (v !== '') obj['V'] = v;
         } else if (lang !== 'English') {
-            value = obj['P'];
-            if (value !== undefined) obj['V'] = transliterate_hk_to_lang(lang, value);
+            const h_id = obj['I'];
+            if (h_id !== undefined) obj['V'] = get_phonetic_text(name.toLowerCase(), h_id);
         }
     }
 }

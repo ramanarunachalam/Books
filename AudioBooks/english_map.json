@@ -97,6 +97,42 @@
             "105": "Kannadasan",
             "106": "Kovi. Manisekharan"
         },
+        "real name": {
+            "1": "rA. kirushNamUrtti",
+            "3": "lakshmi thiripurasundari",
+            "4": "bhAshyam ayyangAr",
+            "5": "bi. jeyamOgan",
+            "7": "Di. jeyakAnthan",
+            "8": "es. rangarAjan",
+            "11": "rA. mahAdEvan",
+            "12": "cho. viruddhAchalam",
+            "23": "su. vEmbu",
+            "24": "rA. su. kirushNasAmi",
+            "29": "jagadIsa thiyAgarAjan",
+            "32": "ve. aNNAmalai",
+            "33": "ci. es. lakshmi",
+            "38": "sA. visuvanAthan",
+            "42": "ci. kalyANasundaram",
+            "44": "en. sItArAman",
+            "53": "kE. es. sundaram",
+            "57": "Ti. kE. bAlasubramaNiyam",
+            "67": "Ar. nArAyaNasvAmi",
+            "71": "Ti. kE. doraisvAmi",
+            "75": "ka. bhakthavatsalan",
+            "80": "pi. vi. akilANDam",
+            "81": "vi. nArAyaNan",
+            "82": "ve. rAmalingam piLLAy",
+            "83": "es. vi. vijayarAghavAccAriyAr",
+            "85": "es. vaiddiyalingam",
+            "89": "u. rAmachandiran",
+            "92": "pi. vi. rAmakirushNA",
+            "94": "thi. ja. ranganAthan",
+            "97": "kE Ar rAjagOpAl",
+            "99": "mADapUsi kirushNasAmy gOvindan",
+            "103": "subbiramaNian",
+            "104": "es. maNi aiyar",
+            "106": "kOvi. maNisEkaran"
+        },
         "narrator": {
             "0": "?",
             "1": "Bharathy Bhaskar",
@@ -2211,7 +2247,7 @@
             "3402": "kAviriyin mugappil",
             "3403": "oru kadhaiyil iraNDu kathaigaL",
             "3404": "solla solla kETkkAmal",
-            "3405": "vaittiyar kangAdaran",
+            "3405": "vaittiyar gangAdaran",
             "3406": "Ezhai kOvil",
             "3407": "pAsakkaNakku",
             "3408": "rayil mazhai",
@@ -2408,7 +2444,8 @@
             "3601": "kELAda kAdugaL",
             "3602": "manachalavai",
             "3603": "thugaL seythu kiDatthuvaL tAy",
-            "3604": "vidhi"
+            "3604": "vidhi",
+            "3605": "kANikkai"
         }
     },
     "map": {
@@ -2486,6 +2523,11 @@
             "Years": "Years",
             "Movie": "Movie",
             "Movies": "Movies"
+        },
+        "website": {
+            "madurai mi.nthoguppu": "madurai minthoguppu",
+            "siRukadhaigaL": "siRukadhaigaL",
+            "valaitamizh": "valaitamizh"
         },
         "month": {
             "Jan": "Jan",
