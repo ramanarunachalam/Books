@@ -298,6 +298,8 @@ function info_transliteration(category, data_list) {
         let value = obj['V'];
         if (name === 'Language') {
             obj['V'] = get_map_text('info', value);
+        } else if (name === 'Written') {
+            obj['V'] = value;
         } else if (name === 'Name') {
             obj['V'] = get_phonetic_text('real name', obj['I']);
         } else if (name === 'Wiki') {
