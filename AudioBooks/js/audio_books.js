@@ -555,7 +555,6 @@ function translate_folder_id_to_data(category, id, data) {
         new_folder[f_type] = v_id;
         get_folder_value(f_category, new_folder, 'H', f_type);
         const new_video_list = [];
-        let p_video_ids = (category !== C_SINGLE) ? folder['B'] : '';
         for (const video_id of video_id_list) {
             const video = video_list[+video_id];
             for (let m = 0; m < OF.length; m++) {
@@ -563,8 +562,7 @@ function translate_folder_id_to_data(category, id, data) {
                 video[c] = st[m];
                 get_folder_value(st[m], video, OF[m], sd[m]);
             }
-            if (category === C_SINGLE) p_video_ids = video['B'];
-            video['PS'] = p_video_ids;
+            video['PS'] = video['B'];
             video['PR'] = video['A'];
             const imageId = video['I'].split('&')[0];
             const path = IMAGE_MAP[video['J']] ?? 'maxdefault.jpg';
