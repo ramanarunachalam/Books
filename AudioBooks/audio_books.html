@@ -1,0 +1,402 @@
+<!DOCTYPE HTML>
+
+<html lang="en" data-bs-theme="dark">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="description" content="Audio Books Youtube Collection is a collection of 22,000+ youtube videos, comprising 2,200+ Books, 80+ Authors, 60+ Narrators, and 5 types."/>
+<meta name="keywords" content="Audio Books Tamil "/>
+<meta name="author" content="Raman Arunachalam"/>
+<link rel="shortcut icon" type="image/x-icon" href="favicon.ico"/>
+<link media="all" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" type="text/css"/>
+<link media="all" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css" type="text/css"/>
+<link media="all" rel="stylesheet" href="css/audio_books.css" type="text/css"/>
+<title>ஒலிப் புத்தகப் பெட்டகம்</title>
+</head>
+<body>
+    <header id="MENU_DATA" class="navbar navbar-expand sticky-top bg-body-tertiary nav-fill"></header>
+    <div class="container-fluid">
+      <div class="d-flex flex-row">
+        <div id="LIST" class="sticky-top d-flex flex-column col-4">
+          <div id="PLAYER" class="p-2">
+            <iframe id="FRAME_PLAYER" name="FRAME_PLAYER" frameBorder="0" allowTransparency="true"; background="transparent"; style="visibility:hidden;" onload="this.style.visibility = 'visible';" allow="autoplay" loading="lazy" scrolling="no"; ></iframe>
+          </div>
+          <div id="MENU" class="p-2"></div>
+        </div>
+        <div id="CONTENT" class="col-8">
+          <div id="PAGE_HEADER" class="card">
+            <div class="card-header">
+              <h3 class="CONTENT_HEADER">
+                <span id="PAGE_TITLE"></span>
+              </h3>
+            </div>
+            <div class="card-body">
+              <div id="PAGE_INFO" class="row"></div>
+            </div>
+          </div>
+          <hr />
+          <div id="PAGE_VIDEOS"></div>
+          <div id="PAGE_LYRICS"></div>
+          <div id="PAGE_REFS"></div>
+        </div>
+      </div>
+    </div>
+    
+    <div id="LANG_KBD" class="modal fade" tabindex="-1" aria-labelledby="KBD_MODEL_LABEL">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content position-absolute bottom-0">
+          <div class="modal-header">
+            <h3 id="KBD_MODEL_LABEL" class="TEXT_COLOR">
+              <i class="bi bi-keyboard ICON_STYLE"></i> Keyboard
+            </h3>
+            <button type="button" class="btn-close TEXT_COLOR" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div id="GENKBD" class="modal-body"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="DIALOG_BOX" class="modal fade" tabindex="-1" aria-labelledby="DIALOG_TITLE">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content TEXT_COLOR">
+          <div class="modal-header">
+            <h5 id="DIALOG_TITLE" class="modal-title"></h5>
+            <button type="button" class="btn-close TEXT_COLOR" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div id="DIALOG_BODY"class="modal-body"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="text/html" id="page-menu-template">
+      {{#menus}}
+        <ul class="navbar-nav col-4">
+          &nbsp; &nbsp;
+          <li class="nav-item">
+            <form class="d-flex" allow="microphone;" method="GET" action="javascript:load_search_data();" role="search">
+              <div class="input-group">
+                <button id="SEARCH_INFO" class="btn" type="submit"><i class="bi bi-search NAV_STYLE" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true" title="{{STP}}"></i></button>
+                <input id="SEARCH_WORD" class="form-control me-2" results=5 autosave=5 autofocus autocomplete="off" name="word" type="text" placeholder="{{S}}" aria-label="Search">
+                <button class="btn" onclick="speech_start(event)"><i id="MIC_IMAGE" class="bi bi-mic-mute NAV_STYLE" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true" title="<em>{{MTP}}</em>"></i></button>
+                <button class="btn" onclick="load_keyboard(event)"><i class="bi bi-keyboard NAV_STYLE" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true" title="<em>{{KTP}}</em>"></i></button>
+              </div>
+            </form>
+          </li>
+        </ul>
+        <ul class="navbar-nav col-8">
+          <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true" title="<em>{{APP}}</em>" href='https://play.google.com/store/apps/details?id=com.indic.carnatic' target="_blank" >
+              <i id="APP_ICON" class="bi bi-android2 NAV_STYLE"></i>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true" title="<em>{{P}}</em>" href='javascript:handle_playlist_command("show", "");'>
+              <i class="bi bi-card-list NAV_STYLE"></i>
+            </a>
+          </li>
+          {{#categories}}
+          <li class="nav-item">
+              <a class="nav-link" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true" title="<em>{{{N}}}</em>" onclick="javascript:load_nav_data('{{C}}', this);" >
+                <i class="bi bi-{{I}} NAV_STYLE"></i>
+              </a>
+          </li>
+          {{/categories}}
+          <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true" title="<em>{{B}}</em>" href='javascript:toggle_brightness();'>
+              <i id="BRIGHTNESS" class="bi bi-{{BI}} NAV_STYLE"></i>
+            </a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle NAV_STYLE" href="#" data-bs-toggle="dropdown" role="button" aria-expanded="false">{{LANGUAGE}}</a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              {{#languages}}
+              <li><a class="dropdown-item TEXT_COLOR" href="javascript:set_language('{{N}}', '{{O}}');">{{N}}</a></li>
+              {{/languages}}
+            </ul>
+          </li>
+        </ul>
+      {{/menus}}
+    </script>
+
+    <script type="text/html" id="nav-data-template">
+      <div class="row g-0">
+        <div id="ALPHABET_LIST" class="col-auto list-group list-group-flush d-flex">
+         {{#alphabet}}
+          <a class="list-group-item list-group-item-action TEXT_COLOR" href="#LETTER_{{LL}}">{{LU}}</a>
+         {{/alphabet}}
+        </div>
+        <div id="ALPHABET_DATA" class="col" data-bs-spy="scroll" data-bs-target="#ALPHABET_LIST" data-bs-offset="0" tabindex="0">
+         {{#alphabet}}
+          <div id="LETTER_{{LL}}">
+            <div class="ALPHABET_HEADER text-center">{{LU}}</div>
+            <ul class="OL_LIST">
+              {{#items}}
+              <li>
+                <a class="TEXT_COLOR" onclick="load_content_data('{{T}}', '{{H}}', this);">
+                 {{^J}}
+                 <i class="bi bi-{{I}} POSTER_STYLE"></i>
+                 {{/J}}
+                 {{#J}}
+                 <img class="POSTER_STYLE" src="{{J}}">
+                 {{/J}}
+                 &nbsp; {{N}}
+                </a>
+              </li>
+              {{/items}}
+            </ul>
+          </div>
+         {{/alphabet}}
+        </div>
+      </div>
+    </script>
+
+    <script type="text/html" id="page-title-template">
+        {{#title}}
+          <i class="bi bi-{{I}} ICON_STYLE"></i>&nbsp; {{N}}
+        {{/title}}
+    </script>
+
+    <script type="text/html" id="page-info-spinner">
+        {{#info}}
+        <center>
+          <button class="btn btn-secondary" type="button" disabled>
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            &nbsp; {{T}}
+          </button>
+        </center>
+        {{/info}}
+    </script>
+
+    <script type="text/html" id="page-info-template">
+      <div class="col-7">
+        {{#poster}}
+        <center>
+          <img src="{{P}}" class="img-thumbnail POSTER" loading="lazy" />
+        </center>
+        {{/poster}}
+        <table border="0" cellpadding="4" class="table table-bordered table-hover table-condensed" >
+          <tbody>
+           {{#info}}
+            <tr><td><em>{{N}}</em></td><td>{{{V}}}</td></tr>
+           {{/info}}
+          </tbody>
+        </table>
+      </div>
+      <div class="col-5">
+        <table border="0" cellpadding="4" class="table table-bordered table-hover table-condensed" >
+          <tbody>
+            {{#stats}}
+            <tr><td><em>{{N}}</em></td><td>{{C}}</td></tr>
+            {{/stats}}
+          </tbody>
+        </table>
+      </div>
+    </script>
+
+    <script type="text/html" id="page-about-template">
+      <div>
+        <table border="0" cellpadding="4" class="table table-bordered table-hover table-condensed" >
+          <tbody>
+          {{#stats}}
+            <tr><td><em>{{N}}</em></td><td>{{C}}</td></tr>
+          {{/stats}}
+          </tbody>
+        </table>
+      </div>
+    </script>
+
+    <script type="text/html" id="page-search-template">
+        <ul class="list-group">
+          {{#items}}
+          <li class="list-group-item">
+            <a class="TEXT_COLOR" href="javascript:load_content_data('{{T}}', '{{H}}');">
+              {{^J}}
+              <i class="bi bi-{{I}} POSTER_STYLE"></i>
+              {{/J}}
+              {{#J}}
+              <img class="POSTER_STYLE" src="{{J}}">
+              {{/J}}
+              &nbsp; {{C}}</i> : {{N}}
+            </a>
+          </li>
+          {{/items}}
+        </ul>
+    </script>
+
+    <script type="text/html" id="page-context-search-template">
+        <table border="0" cellpadding="4" class="table table-bordered table-hover table-condensed" >
+          <tbody>
+             <tr>
+               {{#items}}
+               <td>
+                 <select id="COL_{{I}}" class="form-select">
+                   {{#col}}
+                   <option style="font-size: 12px" value='{{T}}:{{H}}:{{N}}'>{{C}} : {{N}}</option>
+                   {{/col}}
+                 </select>
+               </td>
+               {{/items}}
+             </tr>
+            </tbody>
+        </table>
+        <button type="button" class="btn btn-dark btn-lg btn-block" onclick="handle_context_search(this);">Submit</button>
+    </script>
+
+    <script type="text/html" id="page-videos-template">
+        {{#videos}}
+        <div class="card">
+          <div class="card-header">
+            <h4 class="CONTENT_HEADER">
+              <i class="bi bi-headphones ICON_STYLE"></i>&nbsp; {{VideoName}}:
+            </h4>
+          </div>
+          <div class="card-body">
+            {{#folder}}
+              <ol start="1">
+                <li>
+                  <span>
+                    <i class="bi bi-folder ICON_STYLE"></i>
+                    <a class="TEXT_COLOR" href="javascript:load_content_data('{{HT}}', '{{HD}}');"><b>{{HN}}</b></a> <font class="NUM_COLOR">({{HC}})</font>
+                  </span>
+                  </li>
+                  <ul class="UL_LIST">
+                    {{#books}}
+                    <li>
+                      <img class="IMAGE_STYLE" src="https://i.ytimg.com/vi/{{Y}}">&nbsp;&nbsp;
+                      <a href="javascript:void(0);" onclick="handle_playlist_command('play', '{{I}}:{{PS}}:{{PR}}');">
+                        <i class="bi bi-play ICON_STYLE"></i>
+                      </a>
+                      <a href="javascript:void(0);" onclick="get_youtube_video_info('{{I}}')">{{D}}</a> -
+                      {{#FD}}<a href="javascript:load_content_data('{{FT}}', '{{FD}}');">{{FN}} {{P}}</a> - {{/FD}}
+                      {{#SD}}<a href="javascript:load_content_data('{{ST}}', '{{SD}}');">{{SN}}</a> - {{/SD}}
+                      {{#TD}}<a href="javascript:load_content_data('{{TT}}', '{{TD}}');">{{TN}}</a> - {{/TD}}
+                      {{V}} {{ViewName}} &nbsp;
+                      <a href="https://www.youtube.com/watch?v={{I}}" target="_blank">
+                        <i class="bi bi-youtube ICON_STYLE"></i>
+                      </a>
+                    </li>
+                    {{/books}}
+                  </ul>
+                </ol>
+            {{/folder}}
+          </div>
+        </div>
+        {{/videos}}
+    </script>
+
+    <script type="text/html" id="page-lyrics-text-template">
+        {{#lyricstext}}
+        <div class="card">
+          <div class="card-header">
+            <h4 class="CONTENT_HEADER">
+              <span>
+                <i class="bi bi-pencil ICON_STYLE"></i>&nbsp; {{L}}:
+              </span>
+            </h4>
+          </div>
+          <div class="card-body">
+            <div>
+              <table border="0" cellpadding="4" class="table table-bordered table-hover table-condensed" >
+                <tbody>
+                  {{#text}}
+                  <tr><td><em>{{M}}</em></td><td>{{{T}}}</td></tr>
+                  {{/text}}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <hr />
+        {{/lyricstext}}
+    </script>
+
+    <script type="text/html" id="page-lyrics-ref-template">
+        {{#lyricsref}}
+        <div class="card">
+          <div class="card-header">
+            <h4 class="CONTENT_HEADER">
+              <i class="bi bi-book ICON_STYLE"></i> &nbsp; {{R}}
+            </h4>
+          </div>
+          <div class="card-body">
+            <div class="list-group">
+              {{#links}}
+              <a class="list-group-item REF_COLOR" href="{{L}}" target="_blank">
+                <i class="bi bi-link ICON_STYLE"></i> &nbsp; {{N}}
+              </a>
+              {{/links}}
+            </div>
+          </div>
+        </div>
+        <hr />
+        {{/lyricsref}}
+    </script>
+
+    <script type="text/html" id="modal-playlist-template">
+        {{#playlist}}
+        <table id="PLAYLIST_TABLE" class="table table-hover table-condensed">
+          {{#header}}
+          <tr><th>{{N}}</th><th>{{I}}</th><th>{{BN}}</th><th>{{AN}}</th><th></th></tr>
+          {{/header}}
+          {{#videos}}
+          <tr>
+            <td>{{N}}</td><td>{{I}}</td><td>{{BN}}</td><td>{{AN}}</td>
+            <td><a href="#" onclick="delete_row(this);"><i class="bi bi-x ICON_STYLE"></i></a></td>
+          </tr>
+          {{/videos}}
+        </table>
+        {{/playlist}}
+    </script>
+
+    <script type="text/html" id="modal-videoinfo-template">
+        {{#videoimage}}
+          <center><img class="img-thumbnail POSTER" src="{{P}}" loading="lazy" /></center>
+        {{/videoimage}}
+        <table border="0" cellpadding="4" class="table table-bordered table-hover table-condensed" >
+          <tbody>
+          {{#videoinfo}}
+            <tr><td><em>{{N}}</em></td><td>{{C}}</td></tr>
+          {{/videoinfo}}
+          </tbody>
+        </table>
+        {{#chapters}}
+        <table border="0" cellpadding="4" class="table table-bordered table-hover table-condensed" >
+          <tbody>
+          {{#songs}}
+            <tr><td>{{I}}</td><td><em>{{SN}}</em></td><td>{{RN}}</td><td>{{CN}}</td></tr>
+          {{/songs}}
+          </tbody>
+        </table>
+        {{/chapters}}
+    </script>
+
+    <script type="text/html" id="lang-key-template">
+        <div id="LANGKBD" class="d-inline-block col-lg-6" tabindex="0" ready="1">
+          <table class="langkbd table table-fit">
+            {{#row}}
+            <tr class="keyrow d_flex justify-content-center">
+              {{#col}}
+              <td id="key_{{I}}" {{{C}}} class="keycol flex-fill text-center border rounded" onclick="on_key_click()">{{{N}}}</td>
+              {{/col}}
+            </tr>
+            {{/row}}
+          </table>
+       </div>
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mustache@4.2.0/mustache.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/minisearch@6.3.0/dist/umd/index.min.js"></script>
+    <script src="js/transliterate.js"></script>
+    <script src="js/audio_books.js"></script>
+    <script type="text/javascript">
+        plain_set_attr('FRAME_PLAYER', 'data-src', DEFAULT_YOUTUBE_URL);
+        collection_init('audio_books', 'Payasam');
+    </script>
+
+</body>
+</html>
+
