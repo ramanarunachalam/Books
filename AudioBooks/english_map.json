@@ -1222,7 +1222,6 @@
             "1793": "Emaali Egaambaram",
             "1794": "Jambam Sarathambal",
             "1795": "Kaiyezhuthu Vettai",
-            "1796": "Uyiroviyam",
             "1797": "Aatraamai",
             "1798": "Edirparada Muttam",
             "1799": "Kanagambaram",
@@ -2497,7 +2496,10 @@
             "3708": "Occam",
             "3709": "Wetness",
             "3710": "Bharathi Irundha Veedu",
-            "3711": "Vidum Veliyum"
+            "3711": "Vidum Veliyum",
+            "3712": "Akaayam",
+            "3713": "Vathsalaiyin Vazhkai",
+            "3714": "Uyiroviyam"
         }
     },
     "map": {
