@@ -1114,8 +1114,10 @@
             "1573": "Tolaivu",
             "1574": "Vazhibadu",
             "1575": "Tirppu",
+            "1584": "Kanavu Malargal",
             "1597": "Kannikathaanam",
             "1603": "Sirai",
+            "1610": "Naangu Suvargaluku",
             "1618": "Agni",
             "1639": "Amutha Thanda Kargil Nidhi",
             "1640": "Arindhum Ariyamalum",
@@ -2519,7 +2521,9 @@
             "3801": "Housefull",
             "3802": "One Plus One Zero",
             "3803": "Kadivalam",
-            "3804": "Porvai"
+            "3804": "Porvai",
+            "3805": "Jayattin Bayam",
+            "3806": "Padagu Veedu"
         }
     },
     "map": {
