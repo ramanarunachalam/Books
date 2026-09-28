@@ -1839,6 +1839,7 @@
             "2935": "Kumudam Malarthathu",
             "2939": "Saraswathi Pooja",
             "2940": "Thazhumbu",
+            "2941": "Vizhcci",
             "2945": "Payanamm",
             "2947": "Soapukattigal",
             "2952": "Pey Odippoccu",
@@ -2769,7 +2770,8 @@
             "4163": "Pattampoochiyum Thookkamum",
             "4164": "Marubadiyum Devaki",
             "4165": "Oru Udappu Kan Simittugiradu",
-            "4166": "Sivappu Nimishangal"
+            "4166": "Sivappu Nimishangal",
+            "4167": "Drokam Turattugiradu"
         }
     },
     "map": {
@@ -2852,7 +2854,17 @@
             "busroute": "Bus Route",
             "nammametro": "Namma Metro",
             "Track Me": "Track Me",
-            "Bengaluru Mobility": "Bengaluru Mobility"
+            "Bengaluru Mobility": "Bengaluru Mobility",
+            "No.": "No.",
+            "Time": "Time",
+            "Stops": "Stops",
+            "Trips": "Trips",
+            "Start": "Start",
+            "End": "End",
+            "Filter": "Filter",
+            "Route": "Route",
+            "Origin": "Origin",
+            "Destination": "Destination"
         },
         "website": {
             "madurai mi.nthoguppu": "madurai minthoguppu",
